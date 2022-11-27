@@ -1,0 +1,104 @@
+databaseChangeLog:
+  - logicalFilePath: db/changelog/db.changelog-master.yaml
+  - changeSet:
+      id: 1
+      author: eyakimov
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: true
+              - column:
+                  name: chat_id
+                  type: bigint
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: birthday
+                  type: date
+                  constraints:
+                    nullable: true
+              - column:
+                  name: firstName
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: patronymic
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: lastName
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+  - changeSet:
+      id: 2
+      author: eyakimov
+      changes:
+        - createTable:
+            tableName: department
+            columns:
+              - column:
+                  name: id
+                  type: varchar(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: true
+              - column:
+                  name: full_name_of_department
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: short_name_of_department
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: head_of_department
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: contact_phones_of_department
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: organization
+                  type: varchar(36)
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_org_dep
+                    references: Organization(id)
+                    deleteCascade: true
+  - changeSet:
+      id: 3
+      author: eyakimov
+      changes:
+        - createTable:
+            tableName: POSITION
+            columns:
+              - column:
+                  name: id
+                  type: varchar(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: true
+              - column:
+                  name: name_of_position
+                  type: varchar(255)
+                  constraints:
+                    nullable: true

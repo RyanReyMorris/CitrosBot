@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
-import ru.blogic.CitrosBot.service.TelegramBot;
+import ru.blogic.CitrosBot.TelegramBot;
 
 /**
  * Конфигураця прложения

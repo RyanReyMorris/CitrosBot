@@ -1,4 +1,4 @@
-package ru.blogic.CitrosBot.service;
+package ru.blogic.CitrosBot;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,11 +1,13 @@
 package ru.blogic.CitrosBot.facade;
 
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.blogic.CitrosBot.enums.HandlerEnum;
+import ru.blogic.CitrosBot.handler.Handler;
+
+import java.util.Map;
 
 /**
  * Фасад сервис телеграм бота. Все данные поступающие от пользователя обрабатываются здесь.
@@ -15,19 +17,11 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Component
 public class TelegramFacade {
 
+    @Resource()
+    private Map<HandlerEnum, Handler> systemHandlers;
+
     public BotApiMethod<?> handleUpdate(Update update) {
-        if (update.hasCallbackQuery()) {
-            CallbackQuery callbackQuery = update.getCallbackQuery();
-            return null;
-        } else {
-            Message message = update.getMessage();
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId(String.valueOf(message.getChatId()));
-            if (message.hasText()) {
-                sendMessage.setText("Hello world");
-                return sendMessage;
-            }
-        }
-        return null;
+        HandlerEnum updateType = update.hasCallbackQuery() ? HandlerEnum.CALL_BACK_QUERY_HANDLER : HandlerEnum.MESSAGE_HANDLER;
+        return systemHandlers.get(updateType).handle(update);
     }
 }
