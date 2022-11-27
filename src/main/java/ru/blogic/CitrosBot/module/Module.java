@@ -1,5 +1,7 @@
 package ru.blogic.CitrosBot.module;
 
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
 
 /**
@@ -8,6 +10,14 @@ import ru.blogic.CitrosBot.enums.ModuleEnum;
  * @author eyakimov
  */
 public interface Module {
+    /**
+     * Метод обработки события
+     *
+     * @param update - данные от клиента
+     * @return возвращаемые данные (сообщения/кнопки/меню и т.п.)
+     */
+    BotApiMethod<?> execute(Update update);
+
     /**
      * Метод получения типа модуля
      *

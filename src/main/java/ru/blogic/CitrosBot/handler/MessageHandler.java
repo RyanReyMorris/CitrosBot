@@ -26,7 +26,7 @@ public class MessageHandler implements Handler {
      */
     @Override
     public BotApiMethod<?> handle(Update update) {
-        return null;
+        return systemModules.get(ModuleEnum.REGISTRATION_MODULE).execute(update);
     }
 
     /**
