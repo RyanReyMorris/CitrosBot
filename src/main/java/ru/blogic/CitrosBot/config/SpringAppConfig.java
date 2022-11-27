@@ -1,27 +1,31 @@
 package ru.blogic.CitrosBot.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
-import ru.blogic.CitrosBot.facade.TelegramFacade;
 import ru.blogic.CitrosBot.service.TelegramBot;
 
+/**
+ * Конфигураця прложения
+ *
+ * @author eyakimov
+ */
 @Configuration
 public class SpringAppConfig {
-    private final BotConfig botConfig;
 
-    public SpringAppConfig(BotConfig botConfig) {
-        this.botConfig = botConfig;
-    }
+    @Autowired
+    private BotConfig botConfig;
 
+    //методы ниже нужны для работы бота через веб-хук
     @Bean
     public SetWebhook setWebhookInstance() {
         return SetWebhook.builder().url(botConfig.getBotPath()).build();
     }
 
     @Bean
-    public TelegramBot springWebhookBot(SetWebhook setWebhook, TelegramFacade telegramFacade) {
-        TelegramBot bot = new TelegramBot(telegramFacade, setWebhook);
+    public TelegramBot springWebhookBot(SetWebhook setWebhook) {
+        TelegramBot bot = new TelegramBot(setWebhook);
         bot.setBotToken(botConfig.getBotToken());
         bot.setBotName(botConfig.getBotName());
         bot.setBotPath(botConfig.getBotPath());

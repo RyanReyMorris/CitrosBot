@@ -15,13 +15,19 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BotConfig {
-
+    /**
+     * Адрес веб-хука. Переписать при деплое
+     */
     @Value("${bot.webhook-path}")
     String botPath;
-
+    /**
+     * Имя бота
+     */
     @Value("${bot.name}")
     String botName;
-
+    /**
+     * Токен бота. За получением нового токена eyakimov
+     */
     @Value("${bot.token}")
     String botToken;
 
