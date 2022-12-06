@@ -5,5 +5,9 @@ package ru.blogic.CitrosBot.enums;
  * @author eyakimov
  */
 public enum ModuleEnum {
-    REGISTRATION_MODULE;
+    REGISTRATION_MODULE,
+
+    CHANGE_INFO_MODULE,
+
+    MAIN_MENU_MODULE;
 }

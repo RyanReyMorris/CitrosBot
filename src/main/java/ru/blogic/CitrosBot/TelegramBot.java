@@ -2,11 +2,14 @@ package ru.blogic.CitrosBot;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
 import ru.blogic.CitrosBot.facade.TelegramFacade;
 
@@ -15,9 +18,10 @@ import ru.blogic.CitrosBot.facade.TelegramFacade;
  *
  * @author eyakimov
  */
+@Slf4j
 @Getter
 @Setter
-public class TelegramBot extends SpringWebhookBot {
+public class TelegramBot extends SpringWebhookBot{
     /**
      * Путь веб-хука
      */
@@ -38,6 +42,7 @@ public class TelegramBot extends SpringWebhookBot {
     public TelegramBot(SetWebhook setWebhook) {
         super(setWebhook);
     }
+
     //Методы требуется переопределить для работы бота через веб-хук
     public TelegramBot(DefaultBotOptions options, SetWebhook setWebhook) {
         super(options, setWebhook);
@@ -49,6 +54,19 @@ public class TelegramBot extends SpringWebhookBot {
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         return telegramFacade.handleUpdate(update);
+    }
+
+    /**
+     * Метод предназначенный для отправки сообщений пользователю
+     *
+     * @param sendMessage - передаваемое сообщение
+     */
+    public void sendMessage(SendMessage sendMessage) {
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

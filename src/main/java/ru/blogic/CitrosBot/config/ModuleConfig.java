@@ -9,6 +9,7 @@ import ru.blogic.CitrosBot.module.Module;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Конфигурация модулей приложения
@@ -22,11 +23,11 @@ public class ModuleConfig {
     private List<Module> modules;
 
     @Bean
-    public Map<ModuleEnum, Module> systemModules() {
-        Map<ModuleEnum, Module> systemModules = new HashMap<>();
+    public Map<ModuleEnum, Module> allModules() {
+        Map<ModuleEnum, Module> allModules = new HashMap<>();
         for (Module module : modules) {
-            systemModules.put(module.getModuleType(), module);
+            allModules.put(module.getModuleType(), module);
         }
-        return systemModules;
+        return allModules;
     }
 }

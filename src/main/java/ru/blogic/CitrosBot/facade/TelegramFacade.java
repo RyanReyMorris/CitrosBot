@@ -1,9 +1,11 @@
 package ru.blogic.CitrosBot.facade;
 
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.blogic.CitrosBot.TelegramBot;
 import ru.blogic.CitrosBot.enums.HandlerEnum;
 import ru.blogic.CitrosBot.handler.Handler;
 

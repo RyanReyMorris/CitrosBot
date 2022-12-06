@@ -9,7 +9,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: UUID
+                  type: bigint
                   constraints:
                     primaryKey: true
                     nullable: true
@@ -21,6 +21,11 @@ databaseChangeLog:
               - column:
                   name: status
                   type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: is_registered
+                  type: boolean
                   constraints:
                     nullable: true
               - column:
