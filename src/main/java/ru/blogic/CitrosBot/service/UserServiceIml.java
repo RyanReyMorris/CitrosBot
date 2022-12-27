@@ -8,7 +8,6 @@ import ru.blogic.CitrosBot.enums.ModuleEnum;
 import ru.blogic.CitrosBot.repository.UserRepository;
 
 import java.text.MessageFormat;
-import java.util.Optional;
 
 /**
  * Сервис для работы с пользователем
@@ -21,22 +20,49 @@ public class UserServiceIml implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public ModuleEnum getModuleByUserState(Message message) {
-        Optional<User> user = userRepository.findById(message.getChat().getId());
-        user = user.isPresent() ? user : Optional.of(createNewUser(message));
-        return ModuleEnum.valueOf(user.get().getStatus());
+    public void saveUser(User user) {
+        userRepository.save(user);
     }
 
-    private User createNewUser(Message message) {
-        String firstName = message.getChat().getFirstName() != null ? message.getChat().getFirstName() : "";
-        String lastName = message.getChat().getLastName() != null ? message.getChat().getLastName() : "";
-        String fullName = MessageFormat.format(
-                "{0} {1}", firstName, lastName);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public User findUserById(Long id) {
+        return userRepository.findById(id).
+                orElseThrow(() -> new RuntimeException(MessageFormat.format("Пользователя с id = {0} не было найдено", id)));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ModuleEnum getModuleByUserState(Long id) {
+        User user = userRepository.findById(id).
+                orElseThrow(() -> new RuntimeException(MessageFormat.format("Пользователя с id = {0} не было найдено", id)));
+        return ModuleEnum.valueOf(user.getStatus());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean checkIfUserIsNew(Long id) {
+        return userRepository.findById(id).isEmpty();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public User createNewUser(Message message) {
         User user = User.newBuilder()
                 .setId(message.getFrom().getId())
                 .setChatId(message.getChatId())
-                .setFullName(fullName)
                 .setStatus(ModuleEnum.REGISTRATION_MODULE.name())
                 .setRegistered(false)
                 .build();

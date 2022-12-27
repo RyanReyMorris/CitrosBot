@@ -6,7 +6,16 @@ package ru.blogic.CitrosBot.enums;
  * @author eyakimov
  */
 public enum HandlerEnum {
+    /**
+     * Хэндлер текстовых сообщений
+     */
     MESSAGE_HANDLER,
-
-    CALL_BACK_QUERY_HANDLER;
+    /**
+     * Хэндлер кнопок (не считая кнопок главного меню)
+     */
+    CALL_BACK_QUERY_HANDLER,
+    /**
+     * Хэндел команд бота типа "/info"
+     */
+    BOT_COMMAND_HANDLER
 }

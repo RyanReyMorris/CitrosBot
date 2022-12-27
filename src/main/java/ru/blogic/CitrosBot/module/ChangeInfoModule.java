@@ -2,16 +2,14 @@ package ru.blogic.CitrosBot.module;
 
 import com.vdurmont.emoji.EmojiParser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.blogic.CitrosBot.entity.User;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
-import ru.blogic.CitrosBot.event.CustomApplicationEvent;
-import ru.blogic.CitrosBot.repository.UserRepository;
-import ru.blogic.CitrosBot.service.KeyboardServiceImpl;
+import ru.blogic.CitrosBot.service.KeyboardService;
+import ru.blogic.CitrosBot.service.UserService;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -27,19 +25,23 @@ import java.util.Map;
 public class ChangeInfoModule implements Module {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Autowired
-    private KeyboardServiceImpl keyboardService;
+    private KeyboardService keyboardService;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public BotApiMethod<?> executeMessage(Update update) {
-        User user = userRepository.findById(update.getMessage().getChat().getId()).get();
-        user.changeFullName(update.getMessage().getText());
-        userRepository.save(user);
+        User user = userService.findUserById(update.getMessage().getChat().getId());
+        if (user.getFullName() == null) {
+            user.changeFullName(update.getMessage().getText());
+            userService.saveUser(user);
+            return generateChangeUserNameMessage(user);
+        }
+
         return generateAfterInfoChangeText(user);
     }
 
@@ -48,28 +50,80 @@ public class ChangeInfoModule implements Module {
      */
     @Override
     public BotApiMethod<?> executeCallbackQuery(Update update) {
-        User user = userRepository.findById(update.getCallbackQuery().getMessage().getChat().getId()).get();
+        User user = userService.findUserById(update.getCallbackQuery().getMessage().getChat().getId());
         String button = update.getCallbackQuery().getData();
         SendMessage sendMessage = new SendMessage();
+        if (!user.isRegistered()) {
+            switch (button) {
+                case "START_REGISTRATION_MODULE":
+                    sendMessage = generateStartMessage(user);
+                    break;
+                case "NO_CHANGE_INFO_MODULE":
+                    sendMessage = generateRepeatMessage(user);
+                    break;
+            }
+        }
+
+
         switch (button) {
-            case ("YES_CHANGE_INFO_MODULE"):
-                if (!user.isRegistered()){
+            case "YES_CHANGE_INFO_MODULE":
+                if (!user.isRegistered()) {
                     user.changeUserStatus(ModuleEnum.MAIN_MENU_MODULE.name());
                     user.changeRegistrationStatus(true);
-                    userRepository.save(user);
+                    userService.saveUser(user);
                     sendMessage = generateCancelMessageIfUserNotRegistered(user);
                 } else {
                     user.changeUserStatus(ModuleEnum.MAIN_MENU_MODULE.name());
-                    userRepository.save(user);
+                    userService.saveUser(user);
                     sendMessage = generateCancelMessage(user);
                 }
                 break;
-            case ("NO_CHANGE_INFO_MODULE"):
+            case "NO_CHANGE_INFO_MODULE":
                 sendMessage = generateRepeatMessage(user);
                 break;
         }
         return sendMessage;
     }
+
+    private SendMessage generateChangeUserNameMessage(User user) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(user.getChatId());
+        String text = MessageFormat.format("Понял вас, {0}!{1}2)Выберите отдел, в котором вы работаете:", user.getFullName(), "\n");
+        text = EmojiParser.parseToUnicode(text);
+        sendMessage.setText(text);
+        Map<Integer, Map<String, String>> mapOfMultilineButtons = new HashMap<>();
+
+
+
+        Map<String, String> firstLineButtons = new HashMap<>();
+        firstLineButtons.put("YES_CHANGE_INFO_MODULE", "Да");
+
+        mapOfButtons.put("NO_CHANGE_INFO_MODULE", "Нет");
+        sendMessage.setReplyMarkup(keyboardService.getInlineButtons(mapOfButtons));
+        return sendMessage;
+    }
+
+    private SendMessage generateStartMessage(User user) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(user.getChatId());
+        String text = MessageFormat.format("Персональные данные можно будет изменить в любой момент через главное меню или команду /changeinfo," +
+                "так что не стоит переживать, если вдруг ошибетесь.{0}" +
+                "Давайте начнем по порядку:{1}1) Напишите свое имя (ФИО) так, чтобы ваши коллеги могли вас узнать :clipboard:", "\n", "\n");
+        text = EmojiParser.parseToUnicode(text);
+        sendMessage.setText(text);
+        return sendMessage;
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     private SendMessage generateRepeatMessage(User user) {
         SendMessage sendMessage = new SendMessage();
@@ -102,10 +156,10 @@ public class ChangeInfoModule implements Module {
         return sendMessage;
     }
 
-    private SendMessage generateCancelMessageIfUserNotRegistered(User user){
+    private SendMessage generateCancelMessageIfUserNotRegistered(User user) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(user.getChatId());
-        String text = MessageFormat.format("Отлично, {0} :new_moon_with_face: {1}Да начнется веселье!", user.getFullName(),"\n");
+        String text = MessageFormat.format("Отлично, {0} :new_moon_with_face: {1}Да начнется веселье!", user.getFullName(), "\n");
         text = EmojiParser.parseToUnicode(text);
         sendMessage.setText(text);
         Map<String, String> mapOfButtons = new HashMap<>();

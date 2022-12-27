@@ -1,8 +1,13 @@
 package ru.blogic.CitrosBot.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +16,8 @@ import lombok.ToString;
 import java.sql.Date;
 import java.util.Objects;
 
-@Entity
-@Table(name = "users")
+@Entity(name = "User")
+@Table(name = "user")
 @Getter
 @ToString
 @RequiredArgsConstructor
@@ -25,19 +30,20 @@ public class User {
     private Long chatId;
 
     @Column(name = "status")
-    //sets the broadcast time of events for your time zone
     private String status;
 
     @Column(name = "is_registered")
-    //sets the broadcast time of events for your time zone
     private boolean isRegistered;
 
     @Column(name = "birthday")
     private Date birthday;
 
     @Column(name = "full_name")
-    // on/off send event
     private String fullName;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", unique = true)
+    private Department department;
 
     public void changeUserStatus(String status) {
         this.status = status;
@@ -51,17 +57,21 @@ public class User {
         this.isRegistered = isRegistered;
     }
 
+    public void changeDepartment(Department department) {
+        this.department = department;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id && Objects.equals(chatId, user.chatId) && Objects.equals(status, user.status) && Objects.equals(birthday, user.birthday) && Objects.equals(fullName, user.fullName);
+        return isRegistered == user.isRegistered && Objects.equals(id, user.id) && Objects.equals(chatId, user.chatId) && Objects.equals(status, user.status) && Objects.equals(birthday, user.birthday) && Objects.equals(fullName, user.fullName) && Objects.equals(department, user.department);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, chatId, status, birthday, fullName);
+        return Objects.hash(id, chatId, status, isRegistered, birthday, fullName, department);
     }
 
     public static UserBuilder newBuilder() {
@@ -72,7 +82,7 @@ public class User {
         private UserBuilder() {
         }
 
-        public UserBuilder setId(long id) {
+        public UserBuilder setId(Long id) {
             User.this.id = id;
             return this;
         }
@@ -99,6 +109,11 @@ public class User {
 
         public UserBuilder setFullName(String fullName) {
             User.this.fullName = fullName;
+            return this;
+        }
+
+        public UserBuilder setDepartment(Department department) {
+            User.this.department = department;
             return this;
         }
 

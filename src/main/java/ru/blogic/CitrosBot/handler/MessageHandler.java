@@ -1,18 +1,14 @@
 package ru.blogic.CitrosBot.handler;
 
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.blogic.CitrosBot.entity.User;
 import ru.blogic.CitrosBot.enums.HandlerEnum;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
 import ru.blogic.CitrosBot.module.Module;
-import ru.blogic.CitrosBot.repository.UserRepository;
 import ru.blogic.CitrosBot.service.UserService;
 
 import java.util.Map;
@@ -38,7 +34,7 @@ public class MessageHandler implements Handler {
     @Override
     public BotApiMethod<?> handle(Update update) {
         Message message = update.getMessage();
-        ModuleEnum module = userService.getModuleByUserState(message);
+        ModuleEnum module = userService.getModuleByUserState(message.getChat().getId());
         return allModules.get(module).executeMessage(update);
     }
 

@@ -1,26 +1,20 @@
 package ru.blogic.CitrosBot.module;
 
 import com.vdurmont.emoji.EmojiParser;
-import jakarta.annotation.Resource;
-import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import ru.blogic.CitrosBot.TelegramBot;
 import ru.blogic.CitrosBot.entity.User;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
-import ru.blogic.CitrosBot.event.CustomApplicationEvent;
-import ru.blogic.CitrosBot.repository.UserRepository;
+import ru.blogic.CitrosBot.service.KeyboardService;
+import ru.blogic.CitrosBot.service.UserService;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,28 +24,13 @@ import java.util.Map;
  * @author eyakimov
  */
 @Service
-public class MainMenuModule extends BotCommand implements Module {
+public class MainMenuModule implements Module {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
-    @Override
-    public void setCommand(@NonNull String command) {
-        super.setCommand(command);
-    }
-
-    @Override
-    public void setDescription(@NonNull String description) {
-        super.setDescription(description);
-    }
-
-    public MainMenuModule() {
-        super();
-    }
-
-    public MainMenuModule(@NonNull String command, @NonNull String description) {
-        super(command, description);
-    }
+    @Autowired
+    private KeyboardService keyboardService;
 
     /**
      * {@inheritDoc}
@@ -66,7 +45,7 @@ public class MainMenuModule extends BotCommand implements Module {
      */
     @Override
     public BotApiMethod<?> executeCallbackQuery(Update update) {
-        User user = userRepository.findById(update.getCallbackQuery().getMessage().getChat().getId()).get();
+        User user = userService.findUserById(update.getCallbackQuery().getMessage().getChat().getId());
         String button = update.getCallbackQuery().getData();
         SendMessage sendMessage = new SendMessage();
         switch (button) {
@@ -91,21 +70,15 @@ public class MainMenuModule extends BotCommand implements Module {
         String text = MessageFormat.format(
                 "Добро пожаловать в CitrosBot! :new_moon_with_face: " +
                         "{0}Снизу перечисленны все доступные модули {1}" +
-                        "Если вдруг что-то забудете, всегда можете написать мне /info или же зайти в мое меню", "\n", "\n");
+                        "Если вдруг что-то забудете, всегда можете написать мне /info", "\n", "\n");
         text = EmojiParser.parseToUnicode(text);
         sendMessage.setText(text);
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-        KeyboardRow row = new KeyboardRow();
-        row.add("weather");
-        row.add("get random joke");
-        keyboardRows.add(row);
-        row = new KeyboardRow();
-        row.add("register");
-        row.add("check my data");
-        row.add("delete my data");
-        keyboardRows.add(row);
-        keyboardMarkup.setKeyboard(keyboardRows);
+        Map<Integer, List<String>> mapOfButtons = new HashMap<>();
+        mapOfButtons.put(1, Collections.singletonList(EmojiParser.parseToUnicode(":lower_left_fountain_pen: Изменить данные о себе(/changeinfo)")));
+        ReplyKeyboardMarkup keyboardMarkup = keyboardService.getMenuButtons(mapOfButtons);
+        keyboardMarkup.setResizeKeyboard(true);
+        keyboardMarkup.setInputFieldPlaceholder("Выберите интересующий модуль");
+        keyboardMarkup.setOneTimeKeyboard(true);
         sendMessage.setReplyMarkup(keyboardMarkup);
         return sendMessage;
     }
