@@ -1,6 +1,5 @@
 package ru.blogic.CitrosBot.module;
 
-import com.vdurmont.emoji.EmojiParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -13,8 +12,9 @@ import ru.blogic.CitrosBot.entity.Department;
 import ru.blogic.CitrosBot.entity.UserEntity;
 import ru.blogic.CitrosBot.enums.ButtonEnum;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
+import ru.blogic.CitrosBot.service.ButtonKeyboard;
 import ru.blogic.CitrosBot.service.DepartmentService;
-import ru.blogic.CitrosBot.service.KeyboardService;
+import ru.blogic.CitrosBot.service.MessageService;
 import ru.blogic.CitrosBot.service.UserService;
 
 import java.text.MessageFormat;
@@ -22,12 +22,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Модуль чат-бота, отвечающий за изменение данных пользователяя
+ * Модуль чат-бота, отвечающий за изменение данных пользователя
  * Пользователь указывает свои личные данные, по которым к нему будет обращаться бот, а также другие коллеги.
  *
  * @author eyakimov
@@ -43,10 +41,10 @@ public class ChangeInfoModule implements Module {
     private UserService userService;
 
     @Autowired
-    private KeyboardService keyboardService;
+    private DepartmentService departmentService;
 
     @Autowired
-    private DepartmentService departmentService;
+    private MessageService messageService;
 
     @Lazy
     @Autowired
@@ -57,50 +55,55 @@ public class ChangeInfoModule implements Module {
      */
     @Override
     public BotApiMethod<?> executeMessage(Update update) {
-        UserEntity userEntity = userService.findUserById(update.getMessage().getChat().getId());
+        Message message = update.getMessage();
+        String textOfMessage = message.getText();
+        Long chatId = message.getChatId();
+        UserEntity userEntity = userService.findUserById(chatId);
         switch (ButtonEnum.valueOf(userEntity.getUserInfoStatus())) {
             case START_CHANGE_INFO_MODULE:
-                return generateMessageForInfoChanging(userEntity);
+                return startInfoChanging(chatId);
             case CHANGE_INFO_NAME:
-                telegramBot.deleteMessage(update.getMessage());
-                userEntity.changeFullName(update.getMessage().getText());
+                telegramBot.deleteMessage(message);
+                userEntity.changeFullName(textOfMessage);
                 userService.saveUser(userEntity);
                 if (userEntity.isRegistered()) {
-                    return successInfoChange(userEntity);
+                    return successInfoChange(chatId);
                 }
-                return generateDepartmentChoiceMessage(userEntity);
+                return registrationDepartment(chatId, userEntity.getFullName());
             case CHANGE_INFO_BIRTHDAY:
-                telegramBot.deleteMessage(update.getMessage());
+                telegramBot.deleteMessage(message);
                 try {
-                    Date birthdayDate = new SimpleDateFormat(patternOfDate).parse(update.getMessage().getText());
+                    Date birthdayDate = new SimpleDateFormat(patternOfDate).parse(textOfMessage);
                     userEntity.changeBirthday(birthdayDate);
                     userService.saveUser(userEntity);
                     if (userEntity.isRegistered()) {
-                        return successInfoChange(userEntity);
+                        return successInfoChange(chatId);
                     }
-                    return generateTimeZoneMessage(userEntity);
+                    userEntity.changeUserInfoStatus(ButtonEnum.CHANGE_INFO_TIME_ZONE.name());
+                    userService.saveUser(userEntity);
+                    return registrationTimeZone(chatId);
                 } catch (ParseException e) {
-                    return generateErrorBirthdayParseMessage(userEntity);
+                    return errorBirthdayParseMessage(chatId);
                 }
             case CHANGE_INFO_TIME_ZONE:
-                telegramBot.deleteMessage(update.getMessage());
+                telegramBot.deleteMessage(message);
                 try {
-                    String timeZone = update.getMessage().getText();
-                    ZoneId zoneId = ZoneId.of(timeZone);
-                    userEntity.changeTimeZone(timeZone);
+                    ZoneId.of(textOfMessage);
+                    userEntity.changeTimeZone(textOfMessage);
                     userService.saveUser(userEntity);
                     if (userEntity.isRegistered()) {
-                        return successInfoChange(userEntity);
+                        return successInfoChange(chatId);
                     }
                     userEntity.changeActiveModule(ModuleEnum.MAIN_MENU_MODULE.name());
+                    userEntity.changeUserInfoStatus(ButtonEnum.START_CHANGE_INFO_MODULE.name());
                     userEntity.changeRegistrationStatus(true);
                     userService.saveUser(userEntity);
-                    return generateSuccessRegistrationMessage(userEntity);
+                    return successRegistration(chatId);
                 } catch (Exception exception) {
-                    return generateErrorTimeZoneParseMessage(userEntity);
+                    return errorTimeZoneParseMessage(chatId);
                 }
         }
-        return generateUnknownCommandMessage(userEntity);
+        return messageService.getErrorMessage(chatId);
     }
 
     /**
@@ -109,7 +112,8 @@ public class ChangeInfoModule implements Module {
     @Override
     public BotApiMethod<?> executeCallbackQuery(Update update) {
         Message message = update.getCallbackQuery().getMessage();
-        UserEntity userEntity = userService.findUserById(message.getChat().getId());
+        Long chatId = message.getChatId();
+        UserEntity userEntity = userService.findUserById(chatId);
         String button = update.getCallbackQuery().getData();
         if (departmentService.isExistingDepartment(button)) {
             telegramBot.deleteMessage(message);
@@ -117,34 +121,38 @@ public class ChangeInfoModule implements Module {
             userEntity.changeDepartment(department);
             userService.saveUser(userEntity);
             if (userEntity.isRegistered()) {
-                return successInfoChange(userEntity);
+                return successInfoChange(chatId);
             }
-            return generateBirthdayMessage(userEntity);
+            userEntity.changeUserInfoStatus(ButtonEnum.CHANGE_INFO_BIRTHDAY.name());
+            userService.saveUser(userEntity);
+            return registrationBirthday(chatId);
         }
         switch (ButtonEnum.valueOf(button)) {
             case START_CHANGE_INFO_MODULE:
                 telegramBot.deleteMessage(message);
-                return generateStartMessage(userEntity);
+                userEntity.changeUserInfoStatus(ButtonEnum.CHANGE_INFO_NAME.name());
+                userService.saveUser(userEntity);
+                return registrationStart(chatId);
             case CHANGE_INFO_NAME:
                 telegramBot.deleteMessage(message);
                 userEntity.changeUserInfoStatus(ButtonEnum.CHANGE_INFO_NAME.name());
                 userService.saveUser(userEntity);
-                return changeFullNameMessage(userEntity);
+                return changeFullName(chatId);
             case CHANGE_INFO_BIRTHDAY:
                 telegramBot.deleteMessage(message);
                 userEntity.changeUserInfoStatus(ButtonEnum.CHANGE_INFO_BIRTHDAY.name());
                 userService.saveUser(userEntity);
-                return changeBirthdayMessage(userEntity);
+                return changeBirthday(chatId);
             case CHANGE_INFO_DEPARTMENT:
                 telegramBot.deleteMessage(message);
                 userEntity.changeUserInfoStatus(ButtonEnum.CHANGE_INFO_DEPARTMENT.name());
                 userService.saveUser(userEntity);
-                return changeDepartmentMessage(userEntity);
+                return changeDepartment(chatId);
             case CHANGE_INFO_TIME_ZONE:
                 telegramBot.deleteMessage(message);
                 userEntity.changeUserInfoStatus(ButtonEnum.CHANGE_INFO_TIME_ZONE.name());
                 userService.saveUser(userEntity);
-                return changeTimeZoneMessage(userEntity);
+                return changeTimeZone(chatId);
             case EXIT_MODULE:
                 telegramBot.deleteMessage(message);
                 userEntity.changeActiveModule(ModuleEnum.MAIN_MENU_MODULE.name());
@@ -152,176 +160,178 @@ public class ChangeInfoModule implements Module {
                 userService.saveUser(userEntity);
                 return null;
         }
-        return generateUnknownCommandMessage(userEntity);
+        return messageService.getErrorMessage(chatId);
     }
 
-    private SendMessage generateMessageForInfoChanging(UserEntity userEntity) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
-        String text = EmojiParser.parseToUnicode("Мир - изменчив, скажите, что конкретно вы хотите изменить в своих данных?");
-        Map<Integer, Map<String, String>> mapOfMultilineButtons = new HashMap<>();
+    /**
+     * Первое сообщение при входе в модуль после регистрации
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage startInfoChanging(Long chatId) {
+        String text = "Мир - изменчив, скажите, что конкретно вы хотите изменить в своих данных?";
+        ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
         List<ButtonEnum> userInfoButtons = ButtonEnum.getUserInfoButtons();
         for (int i = 0; i < userInfoButtons.size(); i++) {
-            Map<String, String> lineButtons = new HashMap<>();
-            lineButtons.put(userInfoButtons.get(i).name(), userInfoButtons.get(i).getButtonName());
-            mapOfMultilineButtons.put(i, lineButtons);
+            buttonKeyboard.addMessageButton(i, userInfoButtons.get(i).name(), userInfoButtons.get(i).getButtonName());
         }
-        Map<String, String> lineButtons = new HashMap<>();
-        lineButtons.put(ButtonEnum.EXIT_MODULE.name(), ButtonEnum.EXIT_MODULE.getButtonName());
-        mapOfMultilineButtons.put(userInfoButtons.size(), lineButtons);
-        sendMessage.setReplyMarkup(keyboardService.getMultilineButtons(mapOfMultilineButtons));
-        sendMessage.setText(text);
-        return sendMessage;
+        buttonKeyboard.addMessageButton(userInfoButtons.size(), ButtonEnum.EXIT_MODULE.name(), ButtonEnum.EXIT_MODULE.getButtonName());
+        return messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
     }
 
-    private SendMessage generateUnknownCommandMessage(UserEntity userEntity) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
-        String text = EmojiParser.parseToUnicode(":warning: Ошибка: данная команда недоступна в данным момент или же неизвестна");
-        sendMessage.setText(text);
-        return sendMessage;
-    }
-
-    private SendMessage successInfoChange(UserEntity userEntity) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
+    /**
+     * Сообщение об успешном изменении данных
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage successInfoChange(Long chatId) {
         String text = "Данные успешно изменены, желаете изменить что-нибудь еще?";
-        Map<Integer, Map<String, String>> mapOfMultilineButtons = new HashMap<>();
+        ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
         List<ButtonEnum> userInfoButtons = ButtonEnum.getUserInfoButtons();
         for (int i = 0; i < userInfoButtons.size(); i++) {
-            Map<String, String> lineButtons = new HashMap<>();
-            lineButtons.put(userInfoButtons.get(i).name(), userInfoButtons.get(i).getButtonName());
-            mapOfMultilineButtons.put(i, lineButtons);
+            buttonKeyboard.addMessageButton(i, userInfoButtons.get(i).name(), userInfoButtons.get(i).getButtonName());
         }
-        Map<String, String> lineButtons = new HashMap<>();
-        lineButtons.put(ButtonEnum.EXIT_MODULE.name(), ButtonEnum.EXIT_MODULE.getButtonName());
-        mapOfMultilineButtons.put(userInfoButtons.size(), lineButtons);
-        sendMessage.setReplyMarkup(keyboardService.getMultilineButtons(mapOfMultilineButtons));
-        sendMessage.setText(text);
-        return sendMessage;
+        buttonKeyboard.addMessageButton(userInfoButtons.size(), ButtonEnum.EXIT_MODULE.name(), ButtonEnum.EXIT_MODULE.getButtonName());
+        return messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
     }
 
-    private SendMessage changeTimeZoneMessage(UserEntity userEntity) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
+    /**
+     * Сообщение об изменении часового пояса
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage changeTimeZone(Long chatId) {
         String text = "Введите свой часовой пояс в формате регион/город, к примеру: Asia/Yekaterinburg или Europe/Moscow.";
-        sendMessage.setText(text);
-        return sendMessage;
+        return messageService.getMessage(text, chatId);
     }
 
-    private SendMessage changeDepartmentMessage(UserEntity userEntity) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
+    /**
+     * Сообщение об изменении отдела
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage changeDepartment(Long chatId) {
         String text = "Выберите отдел, в котором вы работаете:";
-        sendMessage.setText(text);
-        Map<Integer, Map<String, String>> mapOfMultilineButtons = new HashMap<>();
+        ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
         List<Department> departmentList = departmentService.getAllDepartments();
         for (int i = 0; i < departmentList.size(); i++) {
-            Map<String, String> lineButtons = new HashMap<>();
-            lineButtons.put(departmentList.get(i).getNameOfDepartment(), departmentList.get(i).getNameOfDepartment());
-            mapOfMultilineButtons.put(i, lineButtons);
+            buttonKeyboard.addMessageButton(i, departmentList.get(i).getNameOfDepartment(), departmentList.get(i).getNameOfDepartment());
         }
-        sendMessage.setReplyMarkup(keyboardService.getMultilineButtons(mapOfMultilineButtons));
-        return sendMessage;
+        return messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
     }
 
-    private SendMessage changeBirthdayMessage(UserEntity userEntity) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
+    /**
+     * Сообщение об изменении даты рождения
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage changeBirthday(Long chatId) {
         String text = MessageFormat.format("Введите дату своего рождения в формате {0}", patternOfDate);
-        sendMessage.setText(text);
-        return sendMessage;
+        return messageService.getMessage(text, chatId);
     }
 
-    private SendMessage changeFullNameMessage(UserEntity userEntity) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
-        String text = EmojiParser.parseToUnicode("Напишите свое имя (ФИО) так, чтобы ваши коллеги могли вас узнать :clipboard:");
-        sendMessage.setText(text);
-        return sendMessage;
+    /**
+     * Сообщение об изменении полного имени
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage changeFullName(Long chatId) {
+        String text = "Напишите свое имя (ФИО) так, чтобы ваши коллеги могли вас узнать :clipboard:";
+        return messageService.getMessage(text, chatId);
     }
 
-    private SendMessage generateSuccessRegistrationMessage(UserEntity userEntity) {
-        userEntity.changeUserInfoStatus(ButtonEnum.START_CHANGE_INFO_MODULE.name());
-        userService.saveUser(userEntity);
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
-        String text = MessageFormat.format("Ши-кар-но :grin:{0}Да начнется веселье!", "\n");
-        text = EmojiParser.parseToUnicode(text);
-        sendMessage.setText(text);
-        Map<String, String> mapOfButtons = new HashMap<>();
-        mapOfButtons.put(ButtonEnum.START_MAIN_MENU_MODULE.name(), ButtonEnum.START_MAIN_MENU_MODULE.getButtonName());
-        sendMessage.setReplyMarkup(keyboardService.getInlineButtons(mapOfButtons));
-        return sendMessage;
+    /**
+     * Сообщение о неверно введенном часовом поясе
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage errorTimeZoneParseMessage(Long chatId) {
+        String text = "Не понял вас :disappointed_relieved:, попробуйте ввести часовой пояс в формате регион/город еще раз";
+        return messageService.getMessage(text, chatId);
     }
 
-    private SendMessage generateErrorTimeZoneParseMessage(UserEntity userEntity) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
-        String text = EmojiParser.parseToUnicode("Не понял вас :disappointed_relieved:, попробуйте ввести часовой пояс в формате регион/город еще раз");
-        sendMessage.setText(text);
-        return sendMessage;
-    }
-
-    private SendMessage generateTimeZoneMessage(UserEntity userEntity) {
-        userEntity.changeUserInfoStatus(ButtonEnum.CHANGE_INFO_TIME_ZONE.name());
-        userService.saveUser(userEntity);
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
-        String text = EmojiParser.parseToUnicode("4) И последний шаг, введите свой часовой пояс" +
-                " в формате регион/город, к примеру: Asia/Yekaterinburg или Europe/Moscow.");
-        sendMessage.setText(text);
-        return sendMessage;
-    }
-
-    private SendMessage generateErrorBirthdayParseMessage(UserEntity userEntity) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
+    /**
+     * Сообщение о неверно введенной дате рождения
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage errorBirthdayParseMessage(Long chatId) {
         String text = MessageFormat.format("Не понял вас :disappointed_relieved:, попробуйте ввести дату в формате {0} еще раз", patternOfDate);
-        text = EmojiParser.parseToUnicode(text);
-        sendMessage.setText(text);
-        return sendMessage;
+        return messageService.getMessage(text, chatId);
     }
 
-    private SendMessage generateBirthdayMessage(UserEntity userEntity) {
-        userEntity.changeUserInfoStatus(ButtonEnum.CHANGE_INFO_BIRTHDAY.name());
-        userService.saveUser(userEntity);
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
+    /**
+     * Сообщение об успешном окончании регистрации
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage successRegistration(Long chatId) {
+        String text = MessageFormat.format("Ши-кар-но :grin:{0}Да начнется веселье!", "\n");
+        ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
+        buttonKeyboard.addMessageButton(0, ButtonEnum.START_MAIN_MENU_MODULE.name(), ButtonEnum.START_MAIN_MENU_MODULE.getButtonName());
+        return messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
+    }
+
+    /**
+     * Четвертое сообщение при регистрации. Ввод часового пояса
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage registrationTimeZone(Long chatId) {
+        String text = "4) И последний шаг, введите свой часовой пояс в формате регион/город, к примеру: Asia/Yekaterinburg или Europe/Moscow.";
+        return messageService.getMessage(text, chatId);
+    }
+
+    /**
+     * Третье сообщение при регистрации. Ввод даты рождения
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage registrationBirthday(Long chatId) {
         String text = MessageFormat.format("Вам повезло работотать в этом отделе!{0}3)Введите дату своего рождения в формате {1}", "\n", patternOfDate);
-        sendMessage.setText(text);
-        return sendMessage;
+        return messageService.getMessage(text, chatId);
     }
 
-    private SendMessage generateDepartmentChoiceMessage(UserEntity userEntity) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
-        String text = MessageFormat.format("Понял вас, {0}!{1}2)Выберите отдел, в котором вы работаете:", userEntity.getFullName(), "\n");
-        text = EmojiParser.parseToUnicode(text);
-        sendMessage.setText(text);
-        Map<Integer, Map<String, String>> mapOfMultilineButtons = new HashMap<>();
+    /**
+     * Второе сообщение при регистрации. Ввод отдела
+     *
+     * @param chatId   - id чата
+     * @param fullName - имя пользователя
+     * @return - SendMessage
+     */
+    private SendMessage registrationDepartment(Long chatId, String fullName) {
+        String text = MessageFormat.format("Понял вас, {0}!{1}2)Выберите отдел, в котором вы работаете:", fullName, "\n");
+        ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
         List<Department> departmentList = departmentService.getAllDepartments();
         for (int i = 0; i < departmentList.size(); i++) {
-            Map<String, String> lineButtons = new HashMap<>();
-            lineButtons.put(departmentList.get(i).getNameOfDepartment(), departmentList.get(i).getNameOfDepartment());
-            mapOfMultilineButtons.put(i, lineButtons);
+            buttonKeyboard.addMessageButton(i, departmentList.get(i).getNameOfDepartment(), departmentList.get(i).getNameOfDepartment());
         }
-        sendMessage.setReplyMarkup(keyboardService.getMultilineButtons(mapOfMultilineButtons));
-        return sendMessage;
+        return messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
     }
 
-    private SendMessage generateStartMessage(UserEntity userEntity) {
-        userEntity.changeUserInfoStatus(ButtonEnum.CHANGE_INFO_NAME.name());
-        userService.saveUser(userEntity);
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
+    /**
+     * Первое сообщение при регистрации. Ввод имени.
+     *
+     * @param chatId - id чата
+     * @return - SendMessage
+     */
+    private SendMessage registrationStart(Long chatId) {
         String text = MessageFormat.format("Персональные данные можно будет изменить в любой момент!{0}" +
                 "В дальнейшем я обязательно расскажу вам, как это сделать,{1}" +
                 "так что не стоит переживать, если вдруг ошибетесь.{2}" +
                 "Давайте начнем по порядку:{3}1) Напишите свое имя (ФИО) так, чтобы ваши коллеги могли вас узнать :clipboard:", "\n", "\n", "\n", "\n");
-        text = EmojiParser.parseToUnicode(text);
-        sendMessage.setText(text);
-        return sendMessage;
+        return messageService.getMessage(text, chatId);
     }
 
     /**

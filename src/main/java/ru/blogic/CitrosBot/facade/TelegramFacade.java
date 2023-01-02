@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.blogic.CitrosBot.entity.UserEntity;
 import ru.blogic.CitrosBot.enums.HandlerEnum;
 import ru.blogic.CitrosBot.handler.Handler;
+import ru.blogic.CitrosBot.service.MessageService;
 import ru.blogic.CitrosBot.service.UserService;
 
 import java.text.MessageFormat;
@@ -25,6 +26,9 @@ public class TelegramFacade {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private MessageService messageService;
 
     @Autowired
     @Qualifier("systemHandlers")
@@ -48,11 +52,8 @@ public class TelegramFacade {
      * @return сообщение
      */
     private SendMessage goAwayMessage(UserEntity userEntity) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(userEntity.getChatId());
-        String text = MessageFormat.format("{0}, к сожалению, вы перманентно заблокированы. До свидания! ", userEntity.getFullName());
-        sendMessage.setText(text);
-        return sendMessage;
+        String text = MessageFormat.format("{0}, к сожалению, вы перманентно заблокированы. До свидания!", userEntity.getFullName());
+        return messageService.getMessage(text, userEntity.getChatId());
     }
 
     /**
