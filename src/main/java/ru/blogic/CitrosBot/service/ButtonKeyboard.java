@@ -40,7 +40,7 @@ public class ButtonKeyboard {
     public void addMessageButton(Integer row, String callBackData, String buttonName) {
         Map<String, String> oneRowButtons = new HashMap<>();
         oneRowButtons.put(callBackData, buttonName);
-        if (mapOfMessageButtons.get(row).isEmpty()) {
+        if (mapOfMessageButtons.get(row) == null) {
             mapOfMessageButtons.put(row, oneRowButtons);
         } else {
             Map<String, String> rowOfButtons = mapOfMessageButtons.get(row);
@@ -77,7 +77,7 @@ public class ButtonKeyboard {
     public void addMenuButton(Integer row, String buttonName) {
         List<String> oneRowButtons = new ArrayList<>();
         oneRowButtons.add(buttonName);
-        if (mapOfMenuButtons.get(row).isEmpty()) {
+        if (mapOfMenuButtons.get(row) == null) {
             mapOfMenuButtons.put(row, oneRowButtons);
         } else {
             List<String> rowOfButtons = mapOfMenuButtons.get(row);

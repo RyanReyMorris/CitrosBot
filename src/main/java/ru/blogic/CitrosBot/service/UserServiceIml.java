@@ -9,6 +9,7 @@ import ru.blogic.CitrosBot.enums.ModuleEnum;
 import ru.blogic.CitrosBot.repository.UserRepository;
 
 import java.text.MessageFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,6 +22,22 @@ public class UserServiceIml implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<UserEntity> findAllNonBirthdayPersons(Date birthday) {
+        return userRepository.findAllByBirthdayNotAndIsBirthdayModuleOnIsTrue(birthday);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<UserEntity> findAllBirthdayPersons(Date birthday) {
+        return userRepository.findAllByBirthdayAndIsBirthdayModuleOnIsTrue(birthday);
+    }
 
     /**
      * {@inheritDoc}

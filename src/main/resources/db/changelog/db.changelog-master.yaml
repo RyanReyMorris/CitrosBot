@@ -64,6 +64,12 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
+                  name: is_birthday_module_on
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: true
+              - column:
                   name: is_blocked
                   type: boolean
                   defaultValueBoolean: false

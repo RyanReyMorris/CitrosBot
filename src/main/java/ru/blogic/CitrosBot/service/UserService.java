@@ -4,6 +4,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.blogic.CitrosBot.entity.UserEntity;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -12,6 +13,21 @@ import java.util.List;
  * @author eyakimov
  */
 public interface UserService {
+    /**
+     * Получение списка всех НЕименинников
+     *
+     * @param birthday - дата рождения
+     * @return - список пользователей
+     */
+    List<UserEntity> findAllNonBirthdayPersons(Date birthday);
+    /**
+     * Получение списка всех именинников
+     *
+     * @param birthday - дата рождения
+     * @return - список пользователей
+     */
+    List<UserEntity> findAllBirthdayPersons(Date birthday);
+
     /**
      * Получение списка админов бота
      *

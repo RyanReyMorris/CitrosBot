@@ -92,6 +92,7 @@ public class BotCommandHandler implements Handler {
 
     /**
      * Вывод информации по боту для пользователя
+     *
      * @param chatId id чата
      * @return SendMessage
      */

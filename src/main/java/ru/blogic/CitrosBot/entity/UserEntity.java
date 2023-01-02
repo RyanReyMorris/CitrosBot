@@ -49,6 +49,9 @@ public class UserEntity {
     @Column(name = "is_blocked")
     private boolean isBlocked;
 
+    @Column(name = "is_birthday_module_on")
+    private boolean isBirthdayModuleOn;
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "id_department", referencedColumnName = "id")
     private Department department;
@@ -89,13 +92,13 @@ public class UserEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UserEntity user = (UserEntity) o;
-        return isRegistered == user.isRegistered && isAdmin == user.isAdmin && isBlocked == user.isBlocked && Objects.equals(id, user.id) && Objects.equals(chatId, user.chatId) && Objects.equals(timeZone, user.timeZone) && Objects.equals(activeModule, user.activeModule) && Objects.equals(userInfoStatus, user.userInfoStatus) && Objects.equals(birthday, user.birthday) && Objects.equals(fullName, user.fullName) && Objects.equals(department, user.department);
+        UserEntity that = (UserEntity) o;
+        return isRegistered == that.isRegistered && isAdmin == that.isAdmin && isBlocked == that.isBlocked && isBirthdayModuleOn == that.isBirthdayModuleOn && Objects.equals(id, that.id) && Objects.equals(chatId, that.chatId) && Objects.equals(timeZone, that.timeZone) && Objects.equals(activeModule, that.activeModule) && Objects.equals(userInfoStatus, that.userInfoStatus) && Objects.equals(birthday, that.birthday) && Objects.equals(fullName, that.fullName) && Objects.equals(department, that.department);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, chatId, timeZone, activeModule, userInfoStatus, isRegistered, birthday, fullName, isAdmin, isBlocked, department);
+        return Objects.hash(id, chatId, timeZone, activeModule, userInfoStatus, isRegistered, birthday, fullName, isAdmin, isBlocked, isBirthdayModuleOn, department);
     }
 
     public static UserBuilder newBuilder() {
@@ -138,6 +141,11 @@ public class UserEntity {
 
         public UserBuilder setAdmin(boolean isAdmin) {
             UserEntity.this.isAdmin = isAdmin;
+            return this;
+        }
+
+        public UserBuilder setBirthdayModuleOn(boolean isBirthdayModuleOn) {
+            UserEntity.this.isBirthdayModuleOn = isBirthdayModuleOn;
             return this;
         }
 
