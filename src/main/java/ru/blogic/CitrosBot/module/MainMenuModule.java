@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import ru.blogic.CitrosBot.entity.User;
+import ru.blogic.CitrosBot.entity.UserEntity;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
 import ru.blogic.CitrosBot.service.KeyboardService;
 import ru.blogic.CitrosBot.service.UserService;
@@ -37,7 +37,11 @@ public class MainMenuModule implements Module {
      */
     @Override
     public BotApiMethod<?> executeMessage(Update update) {
-        return null;
+        UserEntity userEntity = userService.findUserById(update.getMessage().getChat().getId());
+        if (update.getMessage().getEntities().size() != 0) {
+            return generateInfoMessage(userEntity);
+        }
+        return generateUnknownCommandMessage(userEntity);
     }
 
     /**
@@ -45,12 +49,12 @@ public class MainMenuModule implements Module {
      */
     @Override
     public BotApiMethod<?> executeCallbackQuery(Update update) {
-        User user = userService.findUserById(update.getCallbackQuery().getMessage().getChat().getId());
+        UserEntity userEntity = userService.findUserById(update.getCallbackQuery().getMessage().getChat().getId());
         String button = update.getCallbackQuery().getData();
         SendMessage sendMessage = new SendMessage();
         switch (button) {
             case ("START_MAIN_MENU_MODULE"):
-                sendMessage = generateInfoMessage(user);
+                sendMessage = generateInfoMessage(userEntity);
                 break;
         }
         return sendMessage;
@@ -64,22 +68,41 @@ public class MainMenuModule implements Module {
         return ModuleEnum.MAIN_MENU_MODULE;
     }
 
-    private SendMessage generateInfoMessage(User user) {
+    private SendMessage generateInfoMessage(UserEntity userEntity) {
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(user.getChatId());
+        sendMessage.setChatId(userEntity.getChatId());
         String text = MessageFormat.format(
-                "Добро пожаловать в CitrosBot! :new_moon_with_face: " +
-                        "{0}Снизу перечисленны все доступные модули {1}" +
-                        "Если вдруг что-то забудете, всегда можете написать мне /info", "\n", "\n");
+                ":iphone: Добро пожаловать в CitrosBot!{0}" +
+                        ":gear: Я - небольшой творческий проект с расширяемой системой модулей  {1}" +
+                        ":page_with_curl: В главном меню перечислен список всех доступных модулей {2}" +
+                        ":envelope: Вы можете принять участие в моей разработке, оставить обо мне отзыв или предложить новый функционал. Для этого используйте команду /service {3}" +
+                        ":bust_in_silhouette: Если хотите изменить данные о себе, используйте - /changeinfo {4}" +
+                        ":information_source: Если вдруг что-то забудете, всегда можете написать мне /help {5}" +
+                        "Удачи!", "\n", "\n", "\n", "\n", "\n", "\n");
         text = EmojiParser.parseToUnicode(text);
         sendMessage.setText(text);
+        sendMessage.setReplyMarkup(generateMenuButtons());
+        return sendMessage;
+    }
+
+    private SendMessage generateUnknownCommandMessage(UserEntity userEntity) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(userEntity.getChatId());
+        String text = EmojiParser.parseToUnicode(":warning: Ошибка: данная команда недоступна в данным момент или же неизвестна");
+        sendMessage.setText(text);
+        sendMessage.setReplyMarkup(generateMenuButtons());
+        return sendMessage;
+    }
+
+    private ReplyKeyboardMarkup generateMenuButtons() {
         Map<Integer, List<String>> mapOfButtons = new HashMap<>();
-        mapOfButtons.put(1, Collections.singletonList(EmojiParser.parseToUnicode(":lower_left_fountain_pen: Изменить данные о себе(/changeinfo)")));
+        mapOfButtons.put(1, Collections.singletonList(EmojiParser.parseToUnicode(":bust_in_silhouette: Изменить данные о себе(/changeinfo)")));
+        mapOfButtons.put(2, Collections.singletonList(EmojiParser.parseToUnicode(":information_source: Помощь(/help)")));
+        mapOfButtons.put(3, Collections.singletonList(EmojiParser.parseToUnicode(":envelope: Техподдержка(/service)")));
         ReplyKeyboardMarkup keyboardMarkup = keyboardService.getMenuButtons(mapOfButtons);
         keyboardMarkup.setResizeKeyboard(true);
-        keyboardMarkup.setInputFieldPlaceholder("Выберите интересующий модуль");
         keyboardMarkup.setOneTimeKeyboard(true);
-        sendMessage.setReplyMarkup(keyboardMarkup);
-        return sendMessage;
+        keyboardMarkup.setInputFieldPlaceholder("Выберите интересующий вас модуль");
+        return keyboardMarkup;
     }
 }

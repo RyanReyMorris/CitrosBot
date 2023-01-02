@@ -41,6 +41,7 @@ public class KeyboardServiceImpl implements KeyboardService {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<InlineKeyboardButton> keyboardButtonsRow = getOneLineOfButtons(mapOfButtons);
         inlineKeyboardMarkup.setKeyboard(Collections.singletonList(keyboardButtonsRow));
+
         return inlineKeyboardMarkup;
     }
 

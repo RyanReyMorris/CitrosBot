@@ -5,7 +5,26 @@ databaseChangeLog:
       author: eyakimov
       changes:
         - createTable:
-            tableName: user
+            tableName: department
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: true
+              - column:
+                  name: name_of_department
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+  - changeSet:
+      id: 2
+      author: eyakimov
+      changes:
+        - createTable:
+            tableName: user_entity
             columns:
               - column:
                   name: id
@@ -19,7 +38,17 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
-                  name: status
+                  name: time_zone
+                  type: varchar(70)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: active_module
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: user_info_status
                   type: varchar(255)
                   constraints:
                     nullable: true
@@ -29,8 +58,20 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
+                  name: is_admin
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: true
+              - column:
+                  name: is_blocked
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: true
+              - column:
                   name: birthday
-                  type: date
+                  type: TIMESTAMP
                   constraints:
                     nullable: true
               - column:
@@ -47,20 +88,45 @@ databaseChangeLog:
                     references: department(id)
                     deleteCascade: true
   - changeSet:
-      id: 2
+      id: 3
+      author: eyakimov
+      changes:
+        - insert:
+            tableName: department
+            columns:
+              - column:
+                  name: name_of_department
+                  value: "Отдел тестирования Цитрос"
+        - insert:
+            tableName: department
+            columns:
+              - column:
+                  name: name_of_department
+                  value: "Отдел разработки Цитрос"
+  - changeSet:
+      id: 4
       author: eyakimov
       changes:
         - createTable:
-            tableName: department
+            tableName: service_call_request
             columns:
               - column:
                   name: id
                   type: bigint
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
                     nullable: true
               - column:
-                  name: name_of_department
-                  type: varchar(255)
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_service_call_request_user_entity
+                    references: user_entity(id)
+                    deleteCascade: true
+              - column:
+                  name: request_text
+                  type: text
                   constraints:
                     nullable: true

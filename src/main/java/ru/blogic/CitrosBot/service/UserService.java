@@ -1,8 +1,10 @@
 package ru.blogic.CitrosBot.service;
 
 import org.telegram.telegrambots.meta.api.objects.Message;
-import ru.blogic.CitrosBot.entity.User;
+import ru.blogic.CitrosBot.entity.UserEntity;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
+
+import java.util.List;
 
 /**
  * Интерфейс сервиса для работы с пользователем
@@ -11,11 +13,18 @@ import ru.blogic.CitrosBot.enums.ModuleEnum;
  */
 public interface UserService {
     /**
+     * Получение списка админов бота
+     *
+     * @return - объект пользователя
+     */
+    List<UserEntity> findAdmins();
+
+    /**
      * Метод сохранения пользователя в базу данных
      *
-     * @param user - передаваемый пользователь
+     * @param userEntity - передаваемый пользователь
      */
-    void saveUser(User user);
+    void saveUser(UserEntity userEntity);
 
     /**
      * Получение пользователя по его id
@@ -23,7 +32,7 @@ public interface UserService {
      * @param id - передаваемый id пользователя
      * @return - объект пользователя
      */
-    User findUserById(Long id);
+    UserEntity findUserById(Long id);
 
     /**
      * Метод создания нового пользователя
@@ -31,7 +40,7 @@ public interface UserService {
      * @param message - передаваемое сообщение
      * @return - объект пользователя
      */
-    User createNewUser(Message message);
+    UserEntity createNewUser(Message message);
 
     /**
      * Метод проверки, имеется ли пользователь с передаваемым id в базе данных

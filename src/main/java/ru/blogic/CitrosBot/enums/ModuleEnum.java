@@ -6,15 +6,22 @@ package ru.blogic.CitrosBot.enums;
  */
 public enum ModuleEnum {
     /**
+     * Модуль техподдержки
+     */
+    SERVICE_MODULE,
+
+    /**
      * Модуль регистрации
      */
     REGISTRATION_MODULE,
+
     /**
      * Модуль изменения персональной информации
      */
     CHANGE_INFO_MODULE,
+
     /**
      * Модуль главного меню
      */
-    MAIN_MENU_MODULE;
+    MAIN_MENU_MODULE
 }

@@ -1,7 +1,7 @@
 package ru.blogic.CitrosBot.event;
 
 import org.springframework.context.ApplicationEvent;
-import ru.blogic.CitrosBot.entity.User;
+import ru.blogic.CitrosBot.entity.UserEntity;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
 
 /**
@@ -13,20 +13,20 @@ public class CustomApplicationEvent extends ApplicationEvent {
 
     private ModuleEnum moduleEnum;
 
-    private User user;
+    private UserEntity userEntity;
 
-    public CustomApplicationEvent(Object source, ModuleEnum moduleEnum, User user) {
+    public CustomApplicationEvent(Object source, ModuleEnum moduleEnum, UserEntity userEntity) {
         super(source);
         this.moduleEnum = moduleEnum;
-        this.user = user;
+        this.userEntity = userEntity;
     }
 
-    public User getUser() {
-        return user;
+    public UserEntity getUser() {
+        return userEntity;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUser(UserEntity userEntity) {
+        this.userEntity = userEntity;
     }
 
     public ModuleEnum getModuleEnum() {

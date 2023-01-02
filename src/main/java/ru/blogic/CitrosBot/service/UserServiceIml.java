@@ -3,11 +3,13 @@ package ru.blogic.CitrosBot.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import ru.blogic.CitrosBot.entity.User;
+import ru.blogic.CitrosBot.entity.UserEntity;
+import ru.blogic.CitrosBot.enums.ButtonEnum;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
 import ru.blogic.CitrosBot.repository.UserRepository;
 
 import java.text.MessageFormat;
+import java.util.List;
 
 /**
  * Сервис для работы с пользователем
@@ -24,15 +26,23 @@ public class UserServiceIml implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public void saveUser(User user) {
-        userRepository.save(user);
+    public List<UserEntity> findAdmins() {
+        return userRepository.findAllByIsAdminIsTrue();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public User findUserById(Long id) {
+    public void saveUser(UserEntity userEntity) {
+        userRepository.save(userEntity);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UserEntity findUserById(Long id) {
         return userRepository.findById(id).
                 orElseThrow(() -> new RuntimeException(MessageFormat.format("Пользователя с id = {0} не было найдено", id)));
     }
@@ -42,9 +52,9 @@ public class UserServiceIml implements UserService {
      */
     @Override
     public ModuleEnum getModuleByUserState(Long id) {
-        User user = userRepository.findById(id).
+        UserEntity userEntity = userRepository.findById(id).
                 orElseThrow(() -> new RuntimeException(MessageFormat.format("Пользователя с id = {0} не было найдено", id)));
-        return ModuleEnum.valueOf(user.getStatus());
+        return ModuleEnum.valueOf(userEntity.getActiveModule());
     }
 
     /**
@@ -59,14 +69,15 @@ public class UserServiceIml implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public User createNewUser(Message message) {
-        User user = User.newBuilder()
+    public UserEntity createNewUser(Message message) {
+        UserEntity userEntity = UserEntity.newBuilder()
                 .setId(message.getFrom().getId())
                 .setChatId(message.getChatId())
-                .setStatus(ModuleEnum.REGISTRATION_MODULE.name())
+                .setUserInfoStatus(ButtonEnum.START_CHANGE_INFO_MODULE.name())
+                .setActiveModule(ModuleEnum.REGISTRATION_MODULE.name())
                 .setRegistered(false)
                 .build();
-        userRepository.save(user);
-        return user;
+        userRepository.save(userEntity);
+        return userEntity;
     }
 }

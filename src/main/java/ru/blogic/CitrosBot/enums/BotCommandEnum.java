@@ -25,9 +25,13 @@ public enum BotCommandEnum {
      */
     MAIN_MENU("/mainmenu"),
     /**
+     * Команда перехода в модуль техподдержки
+     */
+    SERVICE("/service"),
+    /**
      * Команда получения информации по боту
      */
-    INFO("/info");
+    HELP("/help");
 
     private final String command;
 

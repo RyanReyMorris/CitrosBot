@@ -8,6 +8,8 @@ import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
@@ -21,7 +23,7 @@ import ru.blogic.CitrosBot.facade.TelegramFacade;
 @Slf4j
 @Getter
 @Setter
-public class TelegramBot extends SpringWebhookBot{
+public class TelegramBot extends SpringWebhookBot {
     /**
      * Путь веб-хука
      */
@@ -64,6 +66,22 @@ public class TelegramBot extends SpringWebhookBot{
     public void sendMessage(SendMessage sendMessage) {
         try {
             execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Метод предназначенный для удаления сообщения
+     *
+     * @param message - передаваемыый объект удаляемого сообщения
+     */
+    public void deleteMessage(Message message) {
+        DeleteMessage deleteMessage = new DeleteMessage();
+        deleteMessage.setChatId(message.getChatId());
+        deleteMessage.setMessageId(message.getMessageId());
+        try {
+            execute(deleteMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

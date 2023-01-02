@@ -1,9 +1,6 @@
 package ru.blogic.CitrosBot.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -16,9 +13,9 @@ import lombok.ToString;
 public class Department {
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Id
     @Column(name = "name_of_department")
     private String nameOfDepartment;
 
