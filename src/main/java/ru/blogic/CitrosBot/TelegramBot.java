@@ -6,11 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.VideoNote;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
 import ru.blogic.CitrosBot.facade.TelegramFacade;
@@ -50,12 +53,35 @@ public class TelegramBot extends SpringWebhookBot {
         super(options, setWebhook);
     }
 
+    String fileId = "";
+
     /**
      * {@inheritDoc}
      */
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         return telegramFacade.handleUpdate(update);
+    }
+
+    /**
+     * Метод предназначенный для отправки файла пользователю
+     *
+     * @param sendObject - передаваемое сообщение с фото/видео/аудио
+     */
+    public void sendFileToUser(PartialBotApiMethod<Message> sendObject) {
+        try {
+            if (sendObject.getClass().equals(SendVideoNote.class)) {
+                execute((SendVideoNote) sendObject);
+            }
+            if (sendObject.getClass().equals(SendPhoto.class)) {
+                execute((SendPhoto) sendObject);
+            }
+            if (sendObject.getClass().equals(SendVoice.class)) {
+                execute((SendVoice) sendObject);
+            }
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

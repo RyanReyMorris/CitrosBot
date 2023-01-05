@@ -24,9 +24,19 @@ public enum BotCommandEnum {
     BIRTHDAY("/birthday"),
 
     /**
+     * Команда модуля "Анекдоты"
+     */
+    ANECDOTE("/anecdote"),
+
+    /**
      * Команда перехода в модуль техподдержки
      */
     SERVICE("/service"),
+
+    /**
+     * Секретная команда включения админских прав
+     */
+    ENABLE_ADMIN_ROOTS("/adminrootson"),
 
     /**
      * Команда получения информации по боту

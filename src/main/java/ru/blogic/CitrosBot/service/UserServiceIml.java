@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.blogic.CitrosBot.entity.UserEntity;
-import ru.blogic.CitrosBot.enums.ButtonEnum;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
 import ru.blogic.CitrosBot.repository.UserRepository;
 
@@ -27,8 +26,16 @@ public class UserServiceIml implements UserService {
      * {@inheritDoc}
      */
     @Override
+    public List<UserEntity> findUsersWithAnecdotes() {
+        return userRepository.findUsersWithAnecdotes();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<UserEntity> findAllNonBirthdayPersons(Date birthday) {
-        return userRepository.findAllByBirthdayNotAndIsBirthdayModuleOnIsTrue(birthday);
+        return userRepository.findByBirthdayIsNotAndIsBirthdayModuleOnIsTrue(birthday);
     }
 
     /**
@@ -36,7 +43,7 @@ public class UserServiceIml implements UserService {
      */
     @Override
     public List<UserEntity> findAllBirthdayPersons(Date birthday) {
-        return userRepository.findAllByBirthdayAndIsBirthdayModuleOnIsTrue(birthday);
+        return userRepository.findByBirthdayAndIsBirthdayModuleOnIsTrue(birthday);
     }
 
     /**
@@ -90,7 +97,7 @@ public class UserServiceIml implements UserService {
         UserEntity userEntity = UserEntity.newBuilder()
                 .setId(message.getFrom().getId())
                 .setChatId(message.getChatId())
-                .setUserInfoStatus(ButtonEnum.START_CHANGE_INFO_MODULE.name())
+                .setFullName(message.getFrom().getFirstName())
                 .setActiveModule(ModuleEnum.REGISTRATION_MODULE.name())
                 .setRegistered(false)
                 .build();

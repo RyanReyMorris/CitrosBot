@@ -77,7 +77,7 @@ public class ServiceModule implements Module {
                 return listOfRequests(chatId, serviceCallRequestList);
             }
         } else {
-            if (update.getMessage().getEntities() != null) {
+            if (update.getMessage().hasEntities()) {
                 return infoMessage(chatId);
             }
             ServiceCallRequest serviceCallRequest = ServiceCallRequest.newBuilder()

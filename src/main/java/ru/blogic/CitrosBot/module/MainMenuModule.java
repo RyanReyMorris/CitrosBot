@@ -30,7 +30,7 @@ public class MainMenuModule implements Module {
     @Override
     public BotApiMethod<?> executeMessage(Update update) {
         Long chatId = update.getMessage().getChatId();
-        if (update.getMessage().getEntities().size() != 0) {
+        if (update.getMessage().hasEntities()) {
             return infoMessage(chatId);
         }
         return messageService.getErrorMessage(chatId);
@@ -62,12 +62,14 @@ public class MainMenuModule implements Module {
     private SendMessage infoMessage(Long chatId) {
         String text = MessageFormat.format(
                 ":iphone: Добро пожаловать в CitrosBot!{0}" +
-                        ":gear: Я - небольшой творческий проект с расширяемой системой модулей  {1}" +
-                        ":page_with_curl: В главном меню перечислен список всех доступных модулей {2}" +
-                        ":envelope: Вы можете принять участие в моей разработке, оставить обо мне отзыв или предложить новый функционал. Для этого используйте команду /service {3}" +
-                        ":bust_in_silhouette: Если хотите изменить данные о себе, используйте - /changeinfo {4}" +
-                        ":information_source: Если вдруг что-то забудете, всегда можете написать мне /help {5}" +
-                        "Удачи!", "\n", "\n", "\n", "\n", "\n", "\n");
+                        ":gear: Я - небольшой творческий проект с расширяемой системой модулей {1}" +
+                        ":page_with_curl: В главном меню перечислен список всех доступных модулей{2}" +
+                        ":birthday: Подключите модуль -День рождения-, чтобы раньше всех поздравить своих коллег-именинников{3}" +
+                        ":clown_face: Перейдите в модуль -Анекдоты-, чтобы знать все самые свежие мемы в офисе{4}" +
+                        ":envelope: Вы можете принять участие в моей разработке, оставить обо мне отзыв или предложить новый функционал. Для этого используйте команду /service {5}" +
+                        ":bust_in_silhouette: Если хотите изменить данные о себе, используйте - /changeinfo {6}" +
+                        ":information_source: Если вдруг что-то забудете, всегда можете написать мне /help {7}" +
+                        "Удачи!", "\n", "\n", "\n", "\n", "\n", "\n", "\n", "\n");
         return messageService.getMessageWithMenuButtons(text, chatId, generateMenuButtons());
     }
 
@@ -78,9 +80,11 @@ public class MainMenuModule implements Module {
      */
     private ReplyKeyboardMarkup generateMenuButtons() {
         ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
-        buttonKeyboard.addMenuButton(0, EmojiParser.parseToUnicode(":bust_in_silhouette: Изменить данные о себе(/changeinfo)"));
-        buttonKeyboard.addMenuButton(1, EmojiParser.parseToUnicode(":information_source: Помощь(/help)"));
-        buttonKeyboard.addMenuButton(2, EmojiParser.parseToUnicode(":envelope: Техподдержка(/service)"));
+        buttonKeyboard.addMenuButton(0, EmojiParser.parseToUnicode(":birthday: Анекдоты(/anecdote)"));
+        buttonKeyboard.addMenuButton(1, EmojiParser.parseToUnicode(":birthday: День рождения(/birthday)"));
+        buttonKeyboard.addMenuButton(2, EmojiParser.parseToUnicode(":bust_in_silhouette: Изменить данные о себе(/changeinfo)"));
+        buttonKeyboard.addMenuButton(3, EmojiParser.parseToUnicode(":information_source: Помощь(/help)"));
+        buttonKeyboard.addMenuButton(4, EmojiParser.parseToUnicode(":envelope: Техподдержка(/service)"));
         ReplyKeyboardMarkup keyboardMarkup = buttonKeyboard.getMenuButtons();
         keyboardMarkup.setResizeKeyboard(true);
         keyboardMarkup.setOneTimeKeyboard(true);

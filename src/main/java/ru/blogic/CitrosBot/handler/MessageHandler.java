@@ -33,8 +33,7 @@ public class MessageHandler implements Handler {
      */
     @Override
     public BotApiMethod<?> handle(Update update) {
-        Message message = update.getMessage();
-        ModuleEnum module = userService.getModuleByUserState(message.getChat().getId());
+        ModuleEnum module = userService.getModuleByUserState(update.getMessage().getChatId());
         return allModules.get(module).executeMessage(update);
     }
 

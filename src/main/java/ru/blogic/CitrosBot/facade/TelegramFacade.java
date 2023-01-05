@@ -5,8 +5,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideoNote;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.VideoNote;
 import ru.blogic.CitrosBot.entity.UserEntity;
 import ru.blogic.CitrosBot.enums.HandlerEnum;
 import ru.blogic.CitrosBot.handler.Handler;
@@ -14,6 +18,9 @@ import ru.blogic.CitrosBot.service.MessageService;
 import ru.blogic.CitrosBot.service.UserService;
 
 import java.text.MessageFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,6 +40,8 @@ public class TelegramFacade {
     @Autowired
     @Qualifier("systemHandlers")
     private Map<HandlerEnum, Handler> systemHandlers;
+
+
 
     public BotApiMethod<?> handleUpdate(Update update) {
         checkIsNewUser(update.getMessage());

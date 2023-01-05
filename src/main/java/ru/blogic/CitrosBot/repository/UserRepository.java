@@ -1,6 +1,8 @@
 package ru.blogic.CitrosBot.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.blogic.CitrosBot.entity.UserEntity;
 
 import java.util.Date;
@@ -26,7 +28,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
      * @param birthday - передаваемая дата рождения
      * @return список пользователей
      */
-    List<UserEntity> findAllByBirthdayAndIsBirthdayModuleOnIsTrue(Date birthday);
+    List<UserEntity> findByBirthdayAndIsBirthdayModuleOnIsTrue(Date birthday);
 
     /**
      * Метод получения списка всех НЕименинников
@@ -34,5 +36,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
      * @param birthday - передаваемая дата рождения
      * @return список пользователей
      */
-    List<UserEntity> findAllByBirthdayNotAndIsBirthdayModuleOnIsTrue(Date birthday);
+    List<UserEntity> findByBirthdayIsNotAndIsBirthdayModuleOnIsTrue(Date birthday);
+
+    @Query(value = "select * from user_entity u where exists (select 1 from anecdote a where a.author_id = u.id)",  nativeQuery = true)
+    List<UserEntity> findUsersWithAnecdotes();
 }

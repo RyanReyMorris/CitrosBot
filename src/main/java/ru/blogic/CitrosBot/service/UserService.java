@@ -14,6 +14,12 @@ import java.util.List;
  */
 public interface UserService {
     /**
+     * Метод поиска пользователей, которые записали анекдоты
+     * @return - список пользователей
+     */
+    List<UserEntity> findUsersWithAnecdotes();
+
+    /**
      * Получение списка всех НЕименинников
      *
      * @param birthday - дата рождения

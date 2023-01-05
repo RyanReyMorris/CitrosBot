@@ -8,6 +8,11 @@ import lombok.ToString;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * Сущность пользователя
+ *
+ * @author eyakimov
+ */
 @Entity(name = "UserEntity")
 @Table(name = "user_entity")
 @Getter
@@ -29,10 +34,17 @@ public class UserEntity {
 
     /**
      * Флаг изменения той или иной информации о пользователе.
-     * Необходим для обработки входящих сообщений и нажатий кнопок
+     * Необходим для обработки входящих сообщений и нажатий кнопок в модуле ChangeInfoModule
      */
     @Column(name = "user_info_status")
     private String userInfoStatus;
+
+    /**
+     * Флаг создания анекдота.
+     * Необходим для обработки входящих сообщений и нажатий кнопок в модуле AnecdoteModule
+     */
+    @Column(name = "user_anecdote_status")
+    private String userAnecdoteStatus;
 
     @Column(name = "is_registered")
     private boolean isRegistered;
@@ -55,6 +67,10 @@ public class UserEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "id_department", referencedColumnName = "id")
     private Department department;
+
+    public void changeAdminStatus(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
 
     public void changeBirthday(Date birthday) {
         this.birthday = birthday;
@@ -84,8 +100,16 @@ public class UserEntity {
         this.userInfoStatus = userInfoStatus;
     }
 
+    public void changeUserAnecdoteStatus(String userAnecdoteStatus) {
+        this.userAnecdoteStatus = userAnecdoteStatus;
+    }
+
     public void changeUserBlockStatus(boolean isBlocked) {
         this.isBlocked = isBlocked;
+    }
+
+    public void changeBirthdayModuleOn(boolean isBirthdayModuleOn) {
+        this.isBirthdayModuleOn = isBirthdayModuleOn;
     }
 
     @Override
@@ -93,12 +117,18 @@ public class UserEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
-        return isRegistered == that.isRegistered && isAdmin == that.isAdmin && isBlocked == that.isBlocked && isBirthdayModuleOn == that.isBirthdayModuleOn && Objects.equals(id, that.id) && Objects.equals(chatId, that.chatId) && Objects.equals(timeZone, that.timeZone) && Objects.equals(activeModule, that.activeModule) && Objects.equals(userInfoStatus, that.userInfoStatus) && Objects.equals(birthday, that.birthday) && Objects.equals(fullName, that.fullName) && Objects.equals(department, that.department);
+        return isRegistered == that.isRegistered && isAdmin == that.isAdmin && isBlocked == that.isBlocked
+                && isBirthdayModuleOn == that.isBirthdayModuleOn && Objects.equals(id, that.id)
+                && Objects.equals(chatId, that.chatId) && Objects.equals(timeZone, that.timeZone)
+                && Objects.equals(activeModule, that.activeModule) && Objects.equals(userInfoStatus, that.userInfoStatus)
+                && Objects.equals(userAnecdoteStatus, that.userAnecdoteStatus) && Objects.equals(birthday, that.birthday)
+                && Objects.equals(fullName, that.fullName) && Objects.equals(department, that.department);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, chatId, timeZone, activeModule, userInfoStatus, isRegistered, birthday, fullName, isAdmin, isBlocked, isBirthdayModuleOn, department);
+        return Objects.hash(id, chatId, timeZone, activeModule, userInfoStatus, userAnecdoteStatus, isRegistered,
+                birthday, fullName, isAdmin, isBlocked, isBirthdayModuleOn, department);
     }
 
     public static UserBuilder newBuilder() {
@@ -131,6 +161,11 @@ public class UserEntity {
 
         public UserBuilder setUserInfoStatus(String userInfoStatus) {
             UserEntity.this.userInfoStatus = userInfoStatus;
+            return this;
+        }
+
+        public UserBuilder setUserAnecdoteStatus(String userAnecdoteStatus) {
+            UserEntity.this.userAnecdoteStatus = userAnecdoteStatus;
             return this;
         }
 

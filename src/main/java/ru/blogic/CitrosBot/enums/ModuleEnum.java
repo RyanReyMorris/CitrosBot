@@ -23,5 +23,15 @@ public enum ModuleEnum {
     /**
      * Модуль главного меню
      */
-    MAIN_MENU_MODULE
+    MAIN_MENU_MODULE,
+
+    /**
+     * Модуль Дни рождения
+     */
+    BIRTHDAY_MODULE,
+
+    /**
+     * Модуль Анекдоты
+     */
+    ANECDOTE_MODULE
 }

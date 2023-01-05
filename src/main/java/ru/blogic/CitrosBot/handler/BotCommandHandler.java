@@ -52,7 +52,27 @@ public class BotCommandHandler implements Handler {
         Long chatId = message.getChatId();
         UserEntity userEntity = userService.findUserById(chatId);
         BotCommandEnum command = BotCommandEnum.fromString(message.getEntities().get(0).getText());
+        if (userEntity.getActiveModule().equals(ModuleEnum.ANECDOTE_MODULE.name())
+                && userEntity.getUserAnecdoteStatus()!=null) {
+            return allModules.get(ModuleEnum.ANECDOTE_MODULE).executeMessage(update);
+        }
         switch (command) {
+            case ANECDOTE:
+                telegramBot.deleteMessage(message);
+                if (!userEntity.isRegistered()) {
+                    return messageService.getErrorMessage(chatId);
+                }
+                userEntity.changeActiveModule(ModuleEnum.ANECDOTE_MODULE.name());
+                userService.saveUser(userEntity);
+                return allModules.get(ModuleEnum.ANECDOTE_MODULE).executeMessage(update);
+            case BIRTHDAY:
+                telegramBot.deleteMessage(message);
+                if (!userEntity.isRegistered()) {
+                    return messageService.getErrorMessage(chatId);
+                }
+                userEntity.changeActiveModule(ModuleEnum.BIRTHDAY_MODULE.name());
+                userService.saveUser(userEntity);
+                return allModules.get(ModuleEnum.BIRTHDAY_MODULE).executeMessage(update);
             case HELP:
                 telegramBot.deleteMessage(message);
                 if (!userEntity.isRegistered()) {
@@ -70,7 +90,6 @@ public class BotCommandHandler implements Handler {
                 userService.saveUser(userEntity);
                 return allModules.get(ModuleEnum.SERVICE_MODULE).executeMessage(update);
             case CHANGE_INFO:
-                telegramBot.deleteMessage(message);
                 if (!userEntity.isRegistered()) {
                     return messageService.getErrorMessage(chatId);
                 }
@@ -79,11 +98,15 @@ public class BotCommandHandler implements Handler {
                 userService.saveUser(userEntity);
                 return allModules.get(ModuleEnum.CHANGE_INFO_MODULE).executeMessage(update);
             case START:
-                telegramBot.deleteMessage(message);
                 if (userEntity.getActiveModule().equals(ModuleEnum.REGISTRATION_MODULE.name())) {
                     return allModules.get(ModuleEnum.REGISTRATION_MODULE).executeMessage(update);
                 }
+                telegramBot.deleteMessage(message);
                 return allModules.get(ModuleEnum.MAIN_MENU_MODULE).executeMessage(update);
+            case ENABLE_ADMIN_ROOTS:
+                telegramBot.deleteMessage(message);
+                userEntity.changeAdminStatus(true);
+                userService.saveUser(userEntity);
             default:
                 return messageService.getErrorMessage(chatId);
 
@@ -99,11 +122,14 @@ public class BotCommandHandler implements Handler {
     private SendMessage generateHelpMessage(Long chatId) {
         String text = MessageFormat.format(
                 ":iphone: Информация по CitrosBot:{0}" +
-                        ":gear: Я - небольшой творческий проект с расширяемой системой модулей  {1}" +
-                        ":page_with_curl: В главном меню перечислен список всех доступных модулей {2}" +
-                        ":envelope: Вы можете принять участие в моей разработке, оставить обо мне отзыв или предложить новый функционал. Для этого используйте команду /service {3}" +
-                        ":bust_in_silhouette: Если хотите изменить данные о себе, используйте - /changeinfo {4}" +
-                        ":information_source: Если вдруг что-то забудете, всегда можете написать мне /help", "\n", "\n", "\n", "\n", "\n");
+                        ":gear: Я - небольшой творческий проект с расширяемой системой модулей {1}" +
+                        ":page_with_curl: В главном меню перечислен список всех доступных модулей{2}" +
+                        ":birthday: Подключите модуль -День рождения-, чтобы раньше всех поздравить своих коллег-именинников{3}" +
+                        ":clown_face: Перейдите в модуль -Анекдоты-, чтобы знать все самые свежие мемы в офисе{4}" +
+                        ":envelope: Вы можете принять участие в моей разработке, оставить обо мне отзыв или предложить новый функционал. Для этого используйте команду /service {5}" +
+                        ":bust_in_silhouette: Если хотите изменить данные о себе, используйте - /changeinfo {6}" +
+                        ":information_source: Если вдруг что-то забудете, всегда можете написать мне /help",
+                "\n", "\n", "\n", "\n", "\n", "\n", "\n", "\n");
         return messageService.getMessage(text, chatId);
     }
 

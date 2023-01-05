@@ -53,6 +53,11 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
+                  name: user_anecdote_status
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
                   name: is_registered
                   type: boolean
                   constraints:
@@ -134,5 +139,42 @@ databaseChangeLog:
               - column:
                   name: request_text
                   type: text
+                  constraints:
+                    nullable: true
+  - changeSet:
+      id: 5
+      author: eyakimov
+      changes:
+        - createTable:
+            tableName: anecdote
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: true
+              - column:
+                  name: author_id
+                  type: bigint
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_anecdote_user_entity
+                    references: user_entity(id)
+                    deleteCascade: true
+              - column:
+                  name: file_id
+                  type: text
+                  constraints:
+                    nullable: true
+              - column:
+                  name: name
+                  type: varchar(200)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: file_type
+                  type: varchar(200)
                   constraints:
                     nullable: true

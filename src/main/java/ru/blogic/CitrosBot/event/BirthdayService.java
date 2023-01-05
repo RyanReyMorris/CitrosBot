@@ -1,5 +1,6 @@
 package ru.blogic.CitrosBot.event;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -12,7 +13,6 @@ import ru.blogic.CitrosBot.service.MessageService;
 import ru.blogic.CitrosBot.service.UserService;
 
 import java.text.MessageFormat;
-import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -20,6 +20,7 @@ import java.util.*;
  *
  * @author eyakimov
  */
+@Slf4j
 @Transactional
 @EnableScheduling
 @Service
@@ -36,8 +37,14 @@ public class BirthdayService {
     @Autowired
     private MessageService messageService;
 
+    /**
+     * Метод по созданию событий отправки пользователям уведомления о дне рождения их коллеги
+     * Имениннику отправляется поздравление, а всем его коллегам - уведомление о дне рождения именинника
+     * Метод запускается каждый день в 00:00.
+     */
     @Scheduled(cron = "${bot.birthday.cron}")
-    public void eventService() throws ParseException {
+    public void eventService() {
+        log.info("Ежедневная проверка именинников");
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -46,6 +53,8 @@ public class BirthdayService {
         calendar.set(Calendar.MILLISECOND, 0);
         Date birthdayDate = calendar.getTime();
         List<UserEntity> birthdayPersons = userService.findAllBirthdayPersons(birthdayDate);
+        String logText = birthdayPersons.isEmpty() ? "Именинников сегодня нет" : "Сегодня есть именинники";
+        log.info("logText");
         List<UserEntity> notBirthdayPersons = userService.findAllNonBirthdayPersons(birthdayDate);
         for (UserEntity user : birthdayPersons) {
             Calendar calendarUserTime = getCalendarForUser(user, birthdayDate);
@@ -67,6 +76,13 @@ public class BirthdayService {
         }
     }
 
+    /**
+     * Метод получения точной даты отправки события для пользователя в зависимости от его часового пояса
+     *
+     * @param user - пользователь
+     * @param date - дата дня рождения
+     * @return Calendar - дата отправки события
+     */
     private Calendar getCalendarForUser(UserEntity user, Date date) {
         TimeZone userTimeZone = TimeZone.getTimeZone(user.getTimeZone());
         Calendar userCalendar = Calendar.getInstance(userTimeZone);
@@ -78,7 +94,6 @@ public class BirthdayService {
         Calendar calendarForUser = Calendar.getInstance();
         calendarForUser.setTime(date);
         calendarForUser.add(Calendar.HOUR_OF_DAY, hour);
-        calendarForUser.add(Calendar.MINUTE, 6);
         return calendarForUser;
     }
 }

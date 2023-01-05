@@ -5,6 +5,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+/**
+ * Сущность запроса в техподдержку
+ *
+ * @author eyakimov
+ */
 @Entity(name = "ServiceCallRequest")
 @Table(name = "service_call_request")
 @Getter
