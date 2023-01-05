@@ -88,6 +88,7 @@ public class MainMenuModule implements Module {
         ReplyKeyboardMarkup keyboardMarkup = buttonKeyboard.getMenuButtons();
         keyboardMarkup.setResizeKeyboard(true);
         keyboardMarkup.setOneTimeKeyboard(true);
+        keyboardMarkup.setSelective(true);
         keyboardMarkup.setInputFieldPlaceholder("Выберите интересующий вас модуль");
         return keyboardMarkup;
     }

@@ -25,6 +25,6 @@ public class SendEvent extends Thread {
     @Override
     public void run() {
         TelegramBot telegramBot = ApplicationContextProvider.getApplicationContext().getBean(TelegramBot.class);
-        telegramBot.sendMessage(sendMessage);
+        telegramBot.sendMessageToUser(sendMessage);
     }
 }

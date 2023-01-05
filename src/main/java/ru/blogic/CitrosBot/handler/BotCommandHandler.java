@@ -53,7 +53,8 @@ public class BotCommandHandler implements Handler {
         UserEntity userEntity = userService.findUserById(chatId);
         BotCommandEnum command = BotCommandEnum.fromString(message.getEntities().get(0).getText());
         if (userEntity.getActiveModule().equals(ModuleEnum.ANECDOTE_MODULE.name())
-                && userEntity.getUserAnecdoteStatus()!=null) {
+                && userEntity.getUserAnecdoteStatus() != null) {
+            telegramBot.deleteMessage(message);
             return allModules.get(ModuleEnum.ANECDOTE_MODULE).executeMessage(update);
         }
         switch (command) {
@@ -107,6 +108,7 @@ public class BotCommandHandler implements Handler {
                 telegramBot.deleteMessage(message);
                 userEntity.changeAdminStatus(true);
                 userService.saveUser(userEntity);
+                return messageService.getMessage("Права админа подключены", chatId);
             default:
                 return messageService.getErrorMessage(chatId);
 

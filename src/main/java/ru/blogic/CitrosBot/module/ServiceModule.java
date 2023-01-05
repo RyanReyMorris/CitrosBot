@@ -65,7 +65,7 @@ public class ServiceModule implements Module {
                 UserEntity userToReply = userService.findUserById(serviceCallRequest.getFromUser().getId());
                 userToReply.changeActiveModule(ModuleEnum.SERVICE_MODULE.name());
                 userService.saveUser(userToReply);
-                telegramBot.sendMessage(userReplyMessage(userToReply.getChatId(), update.getMessage().getText()));
+                telegramBot.sendMessageToUser(userReplyMessage(userToReply.getChatId(), update.getMessage().getText()));
                 mapOfServiceRequest.remove(chatId);
                 serviceCallRequestService.deleteServiceCallRequestById(serviceCallRequest.getId());
                 return successReplyMessage(chatId);
@@ -89,7 +89,7 @@ public class ServiceModule implements Module {
             for (UserEntity admin : admins) {
                 admin.changeActiveModule(ModuleEnum.SERVICE_MODULE.name());
                 userService.saveUser(admin);
-                telegramBot.sendMessage(incomingServiceCallMessage(admin.getChatId(), serviceCallRequest));
+                telegramBot.sendMessageToUser(incomingServiceCallMessage(admin.getChatId(), serviceCallRequest));
             }
             return successReviewRequest(chatId);
         }

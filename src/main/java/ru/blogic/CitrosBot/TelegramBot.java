@@ -53,8 +53,6 @@ public class TelegramBot extends SpringWebhookBot {
         super(options, setWebhook);
     }
 
-    String fileId = "";
-
     /**
      * {@inheritDoc}
      */
@@ -64,12 +62,15 @@ public class TelegramBot extends SpringWebhookBot {
     }
 
     /**
-     * Метод предназначенный для отправки файла пользователю
+     * Метод предназначенный для отправки сообщения пользователю.
      *
-     * @param sendObject - передаваемое сообщение с фото/видео/аудио
+     * @param sendObject - передаваемое сообщение с фото/видео/аудио или же обычное текстовое сообщение
      */
-    public void sendFileToUser(PartialBotApiMethod<Message> sendObject) {
+    public void sendMessageToUser(PartialBotApiMethod<Message> sendObject) {
         try {
+            if (sendObject.getClass().equals(SendMessage.class)) {
+                execute((SendMessage) sendObject);
+            }
             if (sendObject.getClass().equals(SendVideoNote.class)) {
                 execute((SendVideoNote) sendObject);
             }
@@ -79,19 +80,6 @@ public class TelegramBot extends SpringWebhookBot {
             if (sendObject.getClass().equals(SendVoice.class)) {
                 execute((SendVoice) sendObject);
             }
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Метод предназначенный для отправки сообщений пользователю
-     *
-     * @param sendMessage - передаваемое сообщение
-     */
-    public void sendMessage(SendMessage sendMessage) {
-        try {
-            execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

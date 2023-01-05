@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.blogic.CitrosBot.TelegramBot;
 import ru.blogic.CitrosBot.entity.Anecdote;
 import ru.blogic.CitrosBot.entity.UserEntity;
@@ -252,6 +253,9 @@ public class AnecdoteModule implements Module {
         String text = "Выберите анекдот:";
         ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
         List<Anecdote> anecdotes = anecdoteService.getAnecdotesByUser(authorId);
+        if (anecdotes.isEmpty()) {
+            return noAnecdotes(chatId);
+        }
         if (anecdotes.size() < 6) {
             for (int i = 0; i < anecdotes.size(); i++) {
                 buttonKeyboard.addMessageButton(i, anecdotes.get(i).getId().toString(), anecdotes.get(i).getName());
@@ -339,8 +343,8 @@ public class AnecdoteModule implements Module {
             buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
             sendMessage = messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
         }
-        telegramBot.sendMessage(sendMessage);
-        telegramBot.sendFileToUser(fileToSend);
+        telegramBot.sendMessageToUser(sendMessage);
+        telegramBot.sendMessageToUser(fileToSend);
     }
 
     /**
@@ -385,13 +389,7 @@ public class AnecdoteModule implements Module {
      */
     private SendMessage noAnecdotes(Long chatId) {
         String text = MessageFormat.format("К сожалению в системе пока что нет ни одного анекдота. Станьте первым!{0}Желаете посмотреть еще что-нибудь?", "\n");
-        ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
-        buttonKeyboard.addMessageButton(0, ButtonEnum.MY_ANECDOTES.name(), ButtonEnum.MY_ANECDOTES.getButtonName());
-        buttonKeyboard.addMessageButton(1, ButtonEnum.CREATE_ANECDOTE.name(), ButtonEnum.CREATE_ANECDOTE.getButtonName());
-        buttonKeyboard.addMessageButton(2, ButtonEnum.GET_RANDOM_ANECDOTE.name(), ButtonEnum.GET_RANDOM_ANECDOTE.getButtonName());
-        buttonKeyboard.addMessageButton(3, ButtonEnum.GET_AUTHOR_ANECDOTES.name(), ButtonEnum.GET_AUTHOR_ANECDOTES.getButtonName());
-        buttonKeyboard.addMessageButton(4, ButtonEnum.EXIT_MODULE.name(), ButtonEnum.EXIT_MODULE.getButtonName());
-        return messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
+        return messageService.getMessageWithButtons(text, chatId, getModuleMainKeyboard());
     }
 
     /**
@@ -402,13 +400,7 @@ public class AnecdoteModule implements Module {
      */
     private SendMessage successSaved(Long chatId) {
         String text = MessageFormat.format("Отлично, анекдот сохранен!{0}Желаете посмотреть еще что-нибудь?", "\n");
-        ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
-        buttonKeyboard.addMessageButton(0, ButtonEnum.MY_ANECDOTES.name(), ButtonEnum.MY_ANECDOTES.getButtonName());
-        buttonKeyboard.addMessageButton(1, ButtonEnum.CREATE_ANECDOTE.name(), ButtonEnum.CREATE_ANECDOTE.getButtonName());
-        buttonKeyboard.addMessageButton(2, ButtonEnum.GET_RANDOM_ANECDOTE.name(), ButtonEnum.GET_RANDOM_ANECDOTE.getButtonName());
-        buttonKeyboard.addMessageButton(3, ButtonEnum.GET_AUTHOR_ANECDOTES.name(), ButtonEnum.GET_AUTHOR_ANECDOTES.getButtonName());
-        buttonKeyboard.addMessageButton(4, ButtonEnum.EXIT_MODULE.name(), ButtonEnum.EXIT_MODULE.getButtonName());
-        return messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
+        return messageService.getMessageWithButtons(text, chatId, getModuleMainKeyboard());
     }
 
     /**
@@ -419,13 +411,7 @@ public class AnecdoteModule implements Module {
      */
     private SendMessage doNotSaveAnecdote(Long chatId) {
         String text = MessageFormat.format("Хорошо, попробуем в следующий раз.{0}Желаете посмотреть еще что-нибудь?", "\n");
-        ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
-        buttonKeyboard.addMessageButton(0, ButtonEnum.MY_ANECDOTES.name(), ButtonEnum.MY_ANECDOTES.getButtonName());
-        buttonKeyboard.addMessageButton(1, ButtonEnum.CREATE_ANECDOTE.name(), ButtonEnum.CREATE_ANECDOTE.getButtonName());
-        buttonKeyboard.addMessageButton(2, ButtonEnum.GET_RANDOM_ANECDOTE.name(), ButtonEnum.GET_RANDOM_ANECDOTE.getButtonName());
-        buttonKeyboard.addMessageButton(3, ButtonEnum.GET_AUTHOR_ANECDOTES.name(), ButtonEnum.GET_AUTHOR_ANECDOTES.getButtonName());
-        buttonKeyboard.addMessageButton(4, ButtonEnum.EXIT_MODULE.name(), ButtonEnum.EXIT_MODULE.getButtonName());
-        return messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
+        return messageService.getMessageWithButtons(text, chatId, getModuleMainKeyboard());
     }
 
     /**
@@ -492,13 +478,22 @@ public class AnecdoteModule implements Module {
                         ":anger: Также и вы можете послушать анекдот вашего коллеги или же получить рандомную шутку.{4}" +
                         ":anger: Все необходимые кнопки представлены ниже. Наслаждайтесь! {5}",
                 "\n", "\n", "\n", "\n", "\n", "\n");
+        return messageService.getMessageWithButtons(text, chatId, getModuleMainKeyboard());
+    }
+
+    /**
+     * Метод получения основных кнопок модуля Анекдотов
+     *
+     * @return InlineKeyboardMarkup - кнопки
+     */
+    private InlineKeyboardMarkup getModuleMainKeyboard() {
         ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
-        buttonKeyboard.addMessageButton(0, ButtonEnum.MY_ANECDOTES.name(), ButtonEnum.MY_ANECDOTES.getButtonName());
-        buttonKeyboard.addMessageButton(1, ButtonEnum.CREATE_ANECDOTE.name(), ButtonEnum.CREATE_ANECDOTE.getButtonName());
+        buttonKeyboard.addMessageButton(0, ButtonEnum.CREATE_ANECDOTE.name(), ButtonEnum.CREATE_ANECDOTE.getButtonName());
+        buttonKeyboard.addMessageButton(1, ButtonEnum.MY_ANECDOTES.name(), ButtonEnum.MY_ANECDOTES.getButtonName());
         buttonKeyboard.addMessageButton(2, ButtonEnum.GET_RANDOM_ANECDOTE.name(), ButtonEnum.GET_RANDOM_ANECDOTE.getButtonName());
         buttonKeyboard.addMessageButton(3, ButtonEnum.GET_AUTHOR_ANECDOTES.name(), ButtonEnum.GET_AUTHOR_ANECDOTES.getButtonName());
         buttonKeyboard.addMessageButton(4, ButtonEnum.EXIT_MODULE.name(), ButtonEnum.EXIT_MODULE.getButtonName());
-        return messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
+        return buttonKeyboard.getMessageButtons();
     }
 
 }
