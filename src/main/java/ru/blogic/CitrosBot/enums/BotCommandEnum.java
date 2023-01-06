@@ -39,6 +39,11 @@ public enum BotCommandEnum {
     ENABLE_ADMIN_ROOTS("/adminrootson"),
 
     /**
+     * Секретная команда отключения админских прав
+     */
+    DISABLE_ADMIN_ROOTS("/adminrootsoff"),
+
+    /**
      * Команда получения информации по боту
      */
     HELP("/help");

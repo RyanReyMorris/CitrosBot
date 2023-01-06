@@ -51,7 +51,12 @@ public class BotCommandHandler implements Handler {
         Message message = update.getMessage();
         Long chatId = message.getChatId();
         UserEntity userEntity = userService.findUserById(chatId);
-        BotCommandEnum command = BotCommandEnum.fromString(message.getEntities().get(0).getText());
+        BotCommandEnum command;
+        try {
+            command = BotCommandEnum.fromString(message.getEntities().get(0).getText());
+        } catch (IllegalArgumentException exception) {
+            return messageService.getErrorMessage(chatId);
+        }
         if (userEntity.getActiveModule().equals(ModuleEnum.ANECDOTE_MODULE.name())
                 && userEntity.getUserAnecdoteStatus() != null) {
             telegramBot.deleteMessage(message);
@@ -109,9 +114,13 @@ public class BotCommandHandler implements Handler {
                 userEntity.changeAdminStatus(true);
                 userService.saveUser(userEntity);
                 return messageService.getMessage("Права админа подключены", chatId);
+            case DISABLE_ADMIN_ROOTS:
+                telegramBot.deleteMessage(message);
+                userEntity.changeAdminStatus(false);
+                userService.saveUser(userEntity);
+                return messageService.getMessage("Права админа отключены", chatId);
             default:
                 return messageService.getErrorMessage(chatId);
-
         }
     }
 
