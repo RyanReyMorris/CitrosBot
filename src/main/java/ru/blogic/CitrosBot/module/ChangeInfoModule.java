@@ -18,11 +18,8 @@ import ru.blogic.CitrosBot.service.MessageService;
 import ru.blogic.CitrosBot.service.UserService;
 
 import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -63,7 +60,7 @@ public class ChangeInfoModule implements Module {
         telegramBot.deleteMessage(message);
         switch (ButtonEnum.valueOf(userEntity.getUserInfoStatus())) {
             case START_CHANGE_INFO_MODULE:
-                return startInfoChanging(chatId);
+                return startInfoChanging(userEntity);
             case CHANGE_INFO_NAME:
                 userEntity.changeFullName(textOfMessage);
                 userService.saveUser(userEntity);
@@ -135,18 +132,24 @@ public class ChangeInfoModule implements Module {
     /**
      * Первое сообщение при входе в модуль после регистрации
      *
-     * @param chatId - id чата
+     * @param userEntity - пользователь
      * @return - SendMessage
      */
-    private SendMessage startInfoChanging(Long chatId) {
-        String text = "Мир - изменчив, скажите, что конкретно вы хотите изменить в своих данных?";
+    private SendMessage startInfoChanging(UserEntity userEntity) {
+        String text = MessageFormat.format("Персональна информация:{0}" +
+                        "Имя:{1}{2}" +
+                        "Дата рождения:{3}{4}" +
+                        "Часовой пояс:{5}{6}" +
+                        "Отдел:{7}{8}" +
+                        "Скажите, что конкретно вы хотите изменить в своих данных?",
+                "\n", userEntity.getFullName(), "\n", userEntity.getBirthday(), "\n", userEntity.getTimeZone(), "\n", userEntity.getDepartment().getNameOfDepartment(), "\n");
         ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
         List<ButtonEnum> userInfoButtons = ButtonEnum.getUserInfoButtons();
         for (int i = 0; i < userInfoButtons.size(); i++) {
             buttonKeyboard.addMessageButton(i, userInfoButtons.get(i).name(), userInfoButtons.get(i).getButtonName());
         }
         buttonKeyboard.addMessageButton(userInfoButtons.size(), ButtonEnum.EXIT_MODULE.name(), ButtonEnum.EXIT_MODULE.getButtonName());
-        return messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
+        return messageService.getMessageWithButtons(text, userEntity.getId(), buttonKeyboard.getMessageButtons());
     }
 
     /**

@@ -80,7 +80,7 @@ public class MainMenuModule implements Module {
      */
     private ReplyKeyboardMarkup generateMenuButtons() {
         ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
-        buttonKeyboard.addMenuButton(0, EmojiParser.parseToUnicode(":birthday: Анекдоты(/anecdote)"));
+        buttonKeyboard.addMenuButton(0, EmojiParser.parseToUnicode(":clown_face: Анекдоты(/anecdote)"));
         buttonKeyboard.addMenuButton(1, EmojiParser.parseToUnicode(":birthday: День рождения(/birthday)"));
         buttonKeyboard.addMenuButton(2, EmojiParser.parseToUnicode(":bust_in_silhouette: Изменить данные о себе(/changeinfo)"));
         buttonKeyboard.addMenuButton(3, EmojiParser.parseToUnicode(":information_source: Помощь(/help)"));
