@@ -137,10 +137,10 @@ public class ChangeInfoModule implements Module {
      */
     private SendMessage startInfoChanging(UserEntity userEntity) {
         String text = MessageFormat.format("Персональна информация:{0}" +
-                        "Имя:{1}{2}" +
-                        "Дата рождения:{3}{4}" +
-                        "Часовой пояс:{5}{6}" +
-                        "Отдел:{7}{8}" +
+                        "1)Имя: {1}{2}" +
+                        "2)Дата рождения: {3}{4}" +
+                        "3)Часовой пояс: {5}{6}" +
+                        "4)Отдел: {7}{8}" +
                         "Скажите, что конкретно вы хотите изменить в своих данных?",
                 "\n", userEntity.getFullName(), "\n", userEntity.getBirthday(), "\n", userEntity.getTimeZone(), "\n", userEntity.getDepartment().getNameOfDepartment(), "\n");
         ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
