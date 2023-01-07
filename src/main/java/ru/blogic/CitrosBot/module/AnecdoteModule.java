@@ -340,11 +340,6 @@ public class AnecdoteModule implements Module {
      */
     private void sendAnecdoteToUser(Anecdote anecdote, Long chatId) {
         PartialBotApiMethod<Message> fileToSend = getFileToSendByAnecdote(anecdote, chatId);
-        if (anecdote.getAuthor().getId().equals(chatId)) {
-            ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
-            String callBackData = MessageFormat.format("DELETE_ANECDOTE:{0}", anecdote.getId());
-            buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
-        }
         telegramBot.sendMessageToUser(fileToSend);
     }
 
@@ -370,8 +365,8 @@ public class AnecdoteModule implements Module {
                 if (anecdote.getAuthor().getId().equals(chatId)) {
                     String callBackData = MessageFormat.format("DELETE_ANECDOTE:{0}", anecdote.getId());
                     buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
+                    sendVideo.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 }
-                sendVideo.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 return sendVideo;
             case VOICE:
                 SendVoice sendVoice = new SendVoice();
@@ -381,8 +376,8 @@ public class AnecdoteModule implements Module {
                 if (anecdote.getAuthor().getId().equals(chatId)) {
                     String callBackData = MessageFormat.format("DELETE_ANECDOTE:{0}", anecdote.getId());
                     buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
+                    sendVoice.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 }
-                sendVoice.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 return sendVoice;
             case VIDEO_NOTE:
                 SendVideoNote sendVideoNote = new SendVideoNote();
@@ -391,8 +386,8 @@ public class AnecdoteModule implements Module {
                 if (anecdote.getAuthor().getId().equals(chatId)) {
                     String callBackData = MessageFormat.format("DELETE_ANECDOTE:{0}", anecdote.getId());
                     buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
+                    sendVideoNote.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 }
-                sendVideoNote.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 return sendVideoNote;
             case PHOTO:
                 SendPhoto sendPhoto = new SendPhoto();
@@ -402,8 +397,8 @@ public class AnecdoteModule implements Module {
                 if (anecdote.getAuthor().getId().equals(chatId)) {
                     String callBackData = MessageFormat.format("DELETE_ANECDOTE:{0}", anecdote.getId());
                     buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
+                    sendPhoto.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 }
-                sendPhoto.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 return sendPhoto;
             default:
                 return new SendMessage();
