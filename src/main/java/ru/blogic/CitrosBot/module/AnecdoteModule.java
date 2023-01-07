@@ -88,6 +88,14 @@ public class AnecdoteModule implements Module {
         }
         switch (ButtonEnum.valueOf(userEntity.getUserAnecdoteStatus())) {
             case CREATE_ANECDOTE:
+                if (message.hasVideo()) {
+                    String fileId = message.getVideo().getFileId();
+                    Anecdote anecdote = preSaveAnecdote.get(chatId);
+                    anecdote.changeFileId(fileId);
+                    anecdote.changeFileType(AnecdoteTypeEnum.VIDEO.name());
+                    preSaveAnecdote.put(chatId, anecdote);
+                    return preSaveAnecdote(chatId);
+                }
                 if (message.hasVoice()) {
                     String fileId = message.getVoice().getFileId();
                     Anecdote anecdote = preSaveAnecdote.get(chatId);
