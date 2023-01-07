@@ -10,10 +10,8 @@ import org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.VideoNote;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
 import ru.blogic.CitrosBot.facade.TelegramFacade;
@@ -43,12 +41,12 @@ public class TelegramBot extends SpringWebhookBot {
     @Autowired
     private TelegramFacade telegramFacade;
 
-    //Методы требуется переопределить для работы бота через веб-хук
+    //Необходимо определить метод для работы бота через веб-хук
     public TelegramBot(SetWebhook setWebhook) {
         super(setWebhook);
     }
 
-    //Методы требуется переопределить для работы бота через веб-хук
+    //Необходимо определить метод для работы бота через веб-хук
     public TelegramBot(DefaultBotOptions options, SetWebhook setWebhook) {
         super(options, setWebhook);
     }
@@ -71,6 +69,9 @@ public class TelegramBot extends SpringWebhookBot {
             if (sendObject.getClass().equals(SendMessage.class)) {
                 execute((SendMessage) sendObject);
             }
+            if (sendObject.getClass().equals(SendVideo.class)) {
+                execute((SendVideo) sendObject);
+            }
             if (sendObject.getClass().equals(SendVideoNote.class)) {
                 execute((SendVideoNote) sendObject);
             }
@@ -88,7 +89,7 @@ public class TelegramBot extends SpringWebhookBot {
     /**
      * Метод предназначенный для удаления сообщения
      *
-     * @param message - передаваемыый объект удаляемого сообщения
+     * @param message - передаваемый объект удаляемого сообщения
      */
     public void deleteMessage(Message message) {
         DeleteMessage deleteMessage = new DeleteMessage();

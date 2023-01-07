@@ -18,11 +18,8 @@ import ru.blogic.CitrosBot.service.MessageService;
 import ru.blogic.CitrosBot.service.UserService;
 
 import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -175,7 +172,7 @@ public class RegistrationModule implements Module {
      * @return - SendMessage
      */
     private SendMessage registrationBirthday(Long chatId) {
-        String text = MessageFormat.format("Вам повезло работотать в этом отделе!{0}3)Введите дату своего рождения в формате {1}", "\n", patternOfDate);
+        String text = MessageFormat.format("Вам повезло работать в этом отделе!{0}3)Введите дату своего рождения в формате {1}", "\n", patternOfDate);
         return messageService.getMessage(text, chatId);
     }
 
@@ -211,7 +208,7 @@ public class RegistrationModule implements Module {
     }
 
     /**
-     * Первое сообщение при регистраии в боте.
+     * Первое сообщение при регистрации в боте.
      *
      * @param chatId   id чата
      * @param fullName - имя пользователя

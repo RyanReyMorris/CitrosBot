@@ -1,7 +1,6 @@
 package ru.blogic.CitrosBot.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.blogic.CitrosBot.entity.UserEntity;
@@ -10,7 +9,6 @@ import ru.blogic.CitrosBot.repository.UserRepository;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 /**

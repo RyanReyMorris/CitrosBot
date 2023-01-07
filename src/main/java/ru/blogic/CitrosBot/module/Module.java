@@ -4,9 +4,6 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Интерфейс модулей чат-бота
  *

@@ -12,6 +12,11 @@ public enum AnecdoteTypeEnum {
     VIDEO_NOTE,
 
     /**
+     * Обычное видео
+     */
+    VIDEO,
+
+    /**
      * Голосовое сообщение
      */
     VOICE,

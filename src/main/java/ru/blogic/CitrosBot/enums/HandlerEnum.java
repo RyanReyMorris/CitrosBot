@@ -15,7 +15,7 @@ public enum HandlerEnum {
      */
     CALL_BACK_QUERY_HANDLER,
     /**
-     * Хэндел команд бота типа "/info"
+     * Хэнделер команд бота типа "/info"
      */
     BOT_COMMAND_HANDLER
 }

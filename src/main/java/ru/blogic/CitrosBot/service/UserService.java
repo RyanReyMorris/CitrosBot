@@ -5,7 +5,6 @@ import ru.blogic.CitrosBot.entity.UserEntity;
 import ru.blogic.CitrosBot.enums.ModuleEnum;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,6 +15,7 @@ import java.util.List;
 public interface UserService {
     /**
      * Метод поиска пользователей, которые записали анекдоты
+     *
      * @return - список пользователей
      */
     List<UserEntity> findUsersWithAnecdotes();
@@ -27,6 +27,7 @@ public interface UserService {
      * @return - список пользователей
      */
     List<UserEntity> findAllNonBirthdayPersons(LocalDate birthday);
+
     /**
      * Получение списка всех именинников
      *
@@ -76,7 +77,7 @@ public interface UserService {
     /**
      * Метод получения требуемого модуля в зависимости от состояния пользователя
      *
-     * @param id - передавваемый id пользователя
+     * @param id - передаваемый id пользователя
      * @return ModuleEnum - вид модуля
      */
     ModuleEnum getModuleByUserState(Long id);

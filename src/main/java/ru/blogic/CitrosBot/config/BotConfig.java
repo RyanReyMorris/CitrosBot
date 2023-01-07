@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Конфигураця бота
+ * Конфигурация бота
  *
  * @author eyakimov
  */
@@ -26,7 +26,7 @@ public class BotConfig {
     @Value("${bot.name}")
     String botName;
     /**
-     * Токен бота. За получением нового токена eyakimov
+     * Токен бота. За получением нового токена обращаться к - eyakimov
      */
     @Value("${bot.token}")
     String botToken;

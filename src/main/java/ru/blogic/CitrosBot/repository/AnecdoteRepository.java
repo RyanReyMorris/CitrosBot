@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface AnecdoteRepository extends JpaRepository<Anecdote, Long> {
     /**
-     * Поиск всех анекдотов для кокретного пользователя
+     * Поиск всех анекдотов для конкретного пользователя
      */
     List<Anecdote> findAllByAuthor_Id(Long authorId);
 }

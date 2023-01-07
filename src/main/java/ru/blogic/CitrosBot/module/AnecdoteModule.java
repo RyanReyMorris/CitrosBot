@@ -6,10 +6,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.send.SendVideoNote;
-import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -343,8 +340,8 @@ public class AnecdoteModule implements Module {
             buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
             sendMessage = messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
         }
-        telegramBot.sendMessageToUser(sendMessage);
         telegramBot.sendMessageToUser(fileToSend);
+        telegramBot.sendMessageToUser(sendMessage);
     }
 
     /**
@@ -359,6 +356,12 @@ public class AnecdoteModule implements Module {
     private PartialBotApiMethod<Message> getFileToSendByAnecdote(Anecdote anecdote, Long chatId) {
         String fileId = anecdote.getFileId();
         switch (AnecdoteTypeEnum.valueOf(anecdote.getFileType())) {
+            case VIDEO:
+                SendVideo sendVideo = new SendVideo();
+                sendVideo.setChatId(chatId);
+                sendVideo.setVideo(new InputFile(fileId));
+                sendVideo.setCaption(anecdote.getName());
+                return sendVideo;
             case VOICE:
                 SendVoice sendVoice = new SendVoice();
                 sendVoice.setChatId(chatId);
@@ -448,7 +451,7 @@ public class AnecdoteModule implements Module {
      * @return SendMessage
      */
     private SendMessage anecdoteNameSaved(Long chatId) {
-        String text = "Отличное название анекдота! Теперь запишите видео-кружок или аудио, или же отправьте мне фото.";
+        String text = "Отличное название анекдота! Теперь запишите видео-кружок или аудио, или же отправьте мне фото/видео.";
         return messageService.getMessage(text, chatId);
     }
 
@@ -473,7 +476,7 @@ public class AnecdoteModule implements Module {
         String text = MessageFormat.format(
                 ":clown_face: Вы находитесь в модуле Анекдотов!{0}" +
                         ":anger: Модуль предназначен для просмотра, а также записи анекдотов.{1}" +
-                        ":anger: Вы можете записать свой анекдот в качестве фото-мема, голосового сообщения или же в качестве видео-кружка, а я его запомню.{2}" +
+                        ":anger: Вы можете записать свой анекдот в качестве фото-мема, видео, голосового сообщения или же в качестве видео-кружка, а я его запомню.{2}" +
                         ":anger: Ваши коллеги смогут насладиться вашими анекдотами в трудный час релиза.{3}" +
                         ":anger: Также и вы можете послушать анекдот вашего коллеги или же получить рандомную шутку.{4}" +
                         ":anger: Все необходимые кнопки представлены ниже. Наслаждайтесь! {5}",

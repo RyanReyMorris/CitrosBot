@@ -13,7 +13,7 @@ public interface DepartmentService {
     /**
      * Метод получения списка всех отделов
      *
-     * @return
+     * @return список отделов
      */
     List<Department> getAllDepartments();
 

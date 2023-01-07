@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import ru.blogic.CitrosBot.TelegramBot;
 
 /**
- * Конфигураця прложения
+ * Конфигурация приложения
  *
  * @author eyakimov
  */

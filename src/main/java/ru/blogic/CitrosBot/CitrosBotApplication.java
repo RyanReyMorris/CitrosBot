@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Спринг-приложение
+ * Главный класс приложения
  *
  * @author eyakimov
  */
