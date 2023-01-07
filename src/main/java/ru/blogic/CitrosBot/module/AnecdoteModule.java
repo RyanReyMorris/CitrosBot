@@ -340,16 +340,12 @@ public class AnecdoteModule implements Module {
      */
     private void sendAnecdoteToUser(Anecdote anecdote, Long chatId) {
         PartialBotApiMethod<Message> fileToSend = getFileToSendByAnecdote(anecdote, chatId);
-        String text = MessageFormat.format("Автор:{0}{1}Название:{2}", anecdote.getAuthor().getFullName(), "\n", anecdote.getName());
-        SendMessage sendMessage = messageService.getMessage(text, chatId);
         if (anecdote.getAuthor().getId().equals(chatId)) {
             ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
             String callBackData = MessageFormat.format("DELETE_ANECDOTE:{0}", anecdote.getId());
             buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
-            sendMessage = messageService.getMessageWithButtons(text, chatId, buttonKeyboard.getMessageButtons());
         }
         telegramBot.sendMessageToUser(fileToSend);
-        telegramBot.sendMessageToUser(sendMessage);
     }
 
     /**
@@ -363,29 +359,51 @@ public class AnecdoteModule implements Module {
      */
     private PartialBotApiMethod<Message> getFileToSendByAnecdote(Anecdote anecdote, Long chatId) {
         String fileId = anecdote.getFileId();
+        ButtonKeyboard buttonKeyboard = new ButtonKeyboard();
+        String caption = MessageFormat.format("Автор:{0}{1}Название:{2}", anecdote.getAuthor().getFullName(), "\n", anecdote.getName());
         switch (AnecdoteTypeEnum.valueOf(anecdote.getFileType())) {
             case VIDEO:
                 SendVideo sendVideo = new SendVideo();
                 sendVideo.setChatId(chatId);
                 sendVideo.setVideo(new InputFile(fileId));
-                sendVideo.setCaption(anecdote.getName());
+                sendVideo.setCaption(caption);
+                if (anecdote.getAuthor().getId().equals(chatId)) {
+                    String callBackData = MessageFormat.format("DELETE_ANECDOTE:{0}", anecdote.getId());
+                    buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
+                }
+                sendVideo.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 return sendVideo;
             case VOICE:
                 SendVoice sendVoice = new SendVoice();
                 sendVoice.setChatId(chatId);
                 sendVoice.setVoice(new InputFile(fileId));
-                sendVoice.setCaption(anecdote.getName());
+                sendVoice.setCaption(caption);
+                if (anecdote.getAuthor().getId().equals(chatId)) {
+                    String callBackData = MessageFormat.format("DELETE_ANECDOTE:{0}", anecdote.getId());
+                    buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
+                }
+                sendVoice.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 return sendVoice;
             case VIDEO_NOTE:
                 SendVideoNote sendVideoNote = new SendVideoNote();
                 sendVideoNote.setChatId(chatId);
                 sendVideoNote.setVideoNote(new InputFile(fileId));
+                if (anecdote.getAuthor().getId().equals(chatId)) {
+                    String callBackData = MessageFormat.format("DELETE_ANECDOTE:{0}", anecdote.getId());
+                    buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
+                }
+                sendVideoNote.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 return sendVideoNote;
             case PHOTO:
                 SendPhoto sendPhoto = new SendPhoto();
                 sendPhoto.setChatId(chatId);
                 sendPhoto.setPhoto(new InputFile(fileId));
-                sendPhoto.setCaption(anecdote.getName());
+                sendPhoto.setCaption(caption);
+                if (anecdote.getAuthor().getId().equals(chatId)) {
+                    String callBackData = MessageFormat.format("DELETE_ANECDOTE:{0}", anecdote.getId());
+                    buttonKeyboard.addMessageButton(0, callBackData, ButtonEnum.DELETE_ANECDOTE.getButtonName());
+                }
+                sendPhoto.setReplyMarkup(buttonKeyboard.getMessageButtons());
                 return sendPhoto;
             default:
                 return new SendMessage();
