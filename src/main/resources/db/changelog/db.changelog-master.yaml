@@ -82,7 +82,7 @@ databaseChangeLog:
                     nullable: true
               - column:
                   name: birthday
-                  type: TIMESTAMP
+                  type: DATE
                   constraints:
                     nullable: true
               - column:

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Objects;
 
@@ -50,7 +51,7 @@ public class UserEntity {
     private boolean isRegistered;
 
     @Column(name = "birthday")
-    private Date birthday;
+    private LocalDate birthday;
 
     @Column(name = "full_name")
     private String fullName;
@@ -72,7 +73,7 @@ public class UserEntity {
         this.isAdmin = isAdmin;
     }
 
-    public void changeBirthday(Date birthday) {
+    public void changeBirthday(LocalDate birthday) {
         this.birthday = birthday;
     }
 
@@ -189,7 +190,7 @@ public class UserEntity {
             return this;
         }
 
-        public UserBuilder setBirthday(Date birthday) {
+        public UserBuilder setBirthday(LocalDate birthday) {
             UserEntity.this.birthday = birthday;
             return this;
         }

@@ -20,6 +20,7 @@ import ru.blogic.CitrosBot.service.UserService;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -69,11 +70,11 @@ public class ChangeInfoModule implements Module {
                 return successInfoChange(chatId);
             case CHANGE_INFO_BIRTHDAY:
                 try {
-                    Date birthdayDate = new SimpleDateFormat(patternOfDate).parse(textOfMessage);
+                    LocalDate birthdayDate = LocalDate.parse(textOfMessage);
                     userEntity.changeBirthday(birthdayDate);
                     userService.saveUser(userEntity);
                     return successInfoChange(chatId);
-                } catch (ParseException e) {
+                } catch (Exception e) {
                     return errorBirthdayParseMessage(chatId);
                 }
             case CHANGE_INFO_TIME_ZONE:
