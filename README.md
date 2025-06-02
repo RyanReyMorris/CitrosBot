@@ -23,9 +23,6 @@ Can be found in [RELEASE_NOTES](RELEASE_NOTES.md).
 ## Code of Conduct
 Please, follow [Code of Conduct](CODE_OF_CONDUCT.md) page.
 
-## Acknowledgments
-...
-
 ## Contributing
 Please, follow [Contributing](CONTRIBUTING.md) page.
 
