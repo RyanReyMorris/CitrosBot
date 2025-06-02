@@ -1,20 +1,20 @@
-# Corporate Telegram Bot
+<div align="center">
+  <img alt="Logo" src="https://raw.githubusercontent.com/ryanreymorris/portfolio/master/public/logo.png" width="100" />
+</div>
+<h1 align="center">
+  Corporate Telegram Bot
+</h1>
+<p align="center">
+MVP just for fun
+</p>
+
 
 ## Overview
 MVP just for fun.
 The bot is built for corporate communication and meme sharing.
 Helps to track birthdays, events, and other things.
 
-## Usage
-...
-
-## Building
-...
-
-## Troubleshooting
-...
-
-## Release Notes
+## 🚨 Release Notes
 Can be found in [RELEASE_NOTES](RELEASE_NOTES.md).
 
 ## Authors
